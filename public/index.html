@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Startup Jury</title>
+    <style>
+      :root {
+        --bg: #0b1020;
+        --panel: rgba(18, 25, 48, 0.82);
+        --panel-2: rgba(27, 38, 74, 0.72);
+        --line: rgba(255,255,255,0.1);
+        --text: #f4f7ff;
+        --muted: #b1bdd8;
+        --accent: #7c9cff;
+        --accent-2: #54d2ff;
+        --green: #37d39a;
+        --yellow: #ffcb6b;
+        --red: #ff7b88;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Inter, Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(84,210,255,0.16), transparent 26%),
+          radial-gradient(circle at top right, rgba(124,156,255,0.14), transparent 28%),
+          linear-gradient(180deg, #0b1020 0%, #0f1833 100%);
+      }
+      .container {
+        width: min(1200px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 36px 0 64px;
+      }
+      .hero {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 20px;
+        align-items: stretch;
+        margin-bottom: 24px;
+      }
+      .hero-card, .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        backdrop-filter: blur(14px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+      }
+      .hero-card { padding: 28px; }
+      .eyebrow {
+        display: inline-flex;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(124,156,255,0.16);
+        color: #dfe6ff;
+        font-size: 13px;
+        margin-bottom: 14px;
+      }
+      h1 { margin: 0 0 10px; font-size: clamp(32px, 5vw, 54px); line-height: 1.03; }
+      .sub { color: var(--muted); font-size: 16px; line-height: 1.65; }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 22px;
+      }
+      .stat {
+        background: var(--panel-2);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 14px;
+      }
+      .stat .v { font-size: 24px; font-weight: 800; margin-bottom: 6px; }
+      .stat .l { font-size: 13px; color: var(--muted); }
+      .hero-side { padding: 24px; display:flex; flex-direction:column; justify-content:center; }
+      .hero-side ul { margin: 16px 0 0; padding-left: 18px; color: var(--muted); line-height: 1.8; }
+      .layout {
+        display: grid;
+        grid-template-columns: 420px 1fr;
+        gap: 20px;
+      }
+      .panel { padding: 22px; }
+      .panel h2 { margin: 0 0 14px; font-size: 22px; }
+      .fields { display: grid; gap: 12px; }
+      .field { display: grid; gap: 8px; }
+      .field label { font-size: 13px; color: #d8e0f7; font-weight: 600; }
+      input, textarea {
+        width: 100%;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.12);
+        color: var(--text);
+        border-radius: 14px;
+        padding: 12px 14px;
+        font-size: 14px;
+        outline: none;
+      }
+      textarea { min-height: 92px; resize: vertical; }
+      input:focus, textarea:focus { border-color: var(--accent-2); box-shadow: 0 0 0 4px rgba(84,210,255,0.1); }
+      .grid-2 { display:grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .actions { display:flex; gap: 10px; margin-top: 16px; }
+      button {
+        border: 0;
+        border-radius: 14px;
+        padding: 14px 18px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #08111f; }
+      .secondary { background: rgba(255,255,255,0.08); color: var(--text); border: 1px solid var(--line); }
+      .muted { color: var(--muted); font-size: 13px; }
+      .results { display: grid; gap: 18px; }
+      .summary-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+      .card {
+        background: rgba(255,255,255,0.045);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 16px;
+      }
+      .card .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+      .card .value { font-size: 28px; font-weight: 800; margin-top: 8px; }
+      .pill {
+        display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:700;
+      }
+      .pill.invest { background: rgba(55,211,154,0.14); color: #97ffd7; }
+      .pill.watch { background: rgba(255,203,107,0.14); color: #ffe4a7; }
+      .pill.pass { background: rgba(255,123,136,0.14); color: #ffc0c8; }
+      .verdict {
+        display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top: 12px; flex-wrap: wrap;
+      }
+      .agents-grid { display:grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+      .agent-title { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom: 10px; }
+      .score { font-size: 22px; font-weight: 800; }
+      .bars { display:grid; gap: 8px; margin-top: 12px; }
+      .bar-row { display:grid; grid-template-columns: 120px 1fr 42px; gap: 10px; align-items:center; font-size: 12px; color: var(--muted); }
+      .bar { height: 8px; border-radius: 999px; background: rgba(255,255,255,0.08); overflow:hidden; }
+      .bar > span { display:block; height:100%; border-radius:999px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+      .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top: 10px; }
+      .chip { background: rgba(255,255,255,0.07); border:1px solid var(--line); border-radius: 999px; padding: 7px 10px; font-size: 12px; color: #dbe6ff; }
+      .lists { display:grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+      ul.clean { margin: 10px 0 0; padding-left: 18px; color: var(--muted); line-height: 1.7; }
+      .debate-list { display:grid; gap: 10px; }
+      .debate-item { border-left: 3px solid rgba(124,156,255,0.45); padding: 12px 14px; background: rgba(255,255,255,0.04); border-radius: 0 16px 16px 0; }
+      .debate-item strong { display:block; margin-bottom: 6px; }
+      .loading, .empty { color: var(--muted); text-align:center; padding: 32px 18px; }
+      .error { background: rgba(255,123,136,0.08); color: #ffc8cf; border: 1px solid rgba(255,123,136,0.2); border-radius: 16px; padding: 12px 14px; margin-bottom: 16px; }
+      @media (max-width: 960px) {
+        .hero, .layout { grid-template-columns: 1fr; }
+        .summary-grid, .agents-grid, .lists { grid-template-columns: 1fr; }
+        .grid-2 { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <section class="hero">
+        <div class="hero-card">
+          <div class="eyebrow">Multi-Agent Startup Evaluation</div>
+          <h1>Startup Jury</h1>
+          <div class="sub">
+            스타트업 아이디어를 입력하면 VC, 시장, 기술, 성장, 리스크 에이전트가 평가하고,
+            debate와 moderator 종합 판단까지 한 번에 보여주는 해커톤용 심사 플랫폼.
+          </div>
+          <div class="stats">
+            <div class="stat"><div class="v">5</div><div class="l">전문 역할 에이전트</div></div>
+            <div class="stat"><div class="v">1</div><div class="l">Moderator Agent</div></div>
+            <div class="stat"><div class="v">3-step</div><div class="l">평가 → 토론 → 종합판단</div></div>
+          </div>
+        </div>
+        <div class="hero-card hero-side">
+          <h2 style="margin:0; font-size:24px;">무엇을 보여주나</h2>
+          <ul>
+            <li>역할별 점수와 세부 breakdown</li>
+            <li>에이전트 간 반박/보완 debate</li>
+            <li>Moderator의 consensus / disagreement</li>
+            <li>투자 판정과 바로 실행할 next actions</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="layout">
+        <div class="panel">
+          <h2>아이디어 입력</h2>
+          <div id="error" class="error" style="display:none"></div>
+          <form id="idea-form" class="fields">
+            <div class="field"><label>제목</label><input name="title" required /></div>
+            <div class="field"><label>한 줄 요약</label><textarea name="summary" required></textarea></div>
+            <div class="grid-2">
+              <div class="field"><label>타깃 고객</label><input name="targetCustomer" /></div>
+              <div class="field"><label>고객 세그먼트</label><input name="customerSegment" /></div>
+            </div>
+            <div class="field"><label>문제</label><textarea name="problem"></textarea></div>
+            <div class="field"><label>해결 방법</label><textarea name="solution"></textarea></div>
+            <div class="field"><label>차별점</label><textarea name="uniqueValue"></textarea></div>
+            <div class="grid-2">
+              <div class="field"><label>수익모델</label><input name="revenueModel" /></div>
+              <div class="field"><label>가격 가설</label><input name="pricingHint" /></div>
+            </div>
+            <div class="grid-2">
+              <div class="field"><label>초기 획득 채널</label><input name="acquisitionChannel" /></div>
+              <div class="field"><label>시장 지역</label><input name="marketRegion" value="Korea" /></div>
+            </div>
+            <div class="field"><label>왜 지금인가</label><textarea name="whyNow"></textarea></div>
+            <div class="grid-2">
+              <div class="field"><label>팀 강점</label><textarea name="teamStrength"></textarea></div>
+              <div class="field"><label>MVP 범위</label><textarea name="mvpScope"></textarea></div>
+            </div>
+            <div class="grid-2">
+              <div class="field"><label>경쟁사 (쉼표 구분)</label><input name="competitors" /></div>
+              <div class="field"><label>단계</label><input name="stage" value="idea" /></div>
+            </div>
+            <div class="actions">
+              <button type="submit" class="primary">사업성 평가 시작</button>
+              <button type="button" class="secondary" id="fill-demo">데모 데이터 채우기</button>
+            </div>
+            <div class="muted">현재 서버 모드: <span id="server-mode">확인 중...</span></div>
+          </form>
+        </div>
+
+        <div class="results">
+          <div id="result-empty" class="panel empty">왼쪽에서 아이디어를 입력하고 평가를 시작하면 결과가 여기 표시된다.</div>
+          <div id="result-wrap" style="display:none; gap:18px;">
+            <div class="panel">
+              <div class="summary-grid">
+                <div class="card"><div class="label">Overall Score</div><div class="value" id="overall-score">-</div></div>
+                <div class="card"><div class="label">Verdict</div><div class="value" id="overall-verdict">-</div></div>
+                <div class="card"><div class="label">Moderator Confidence</div><div class="value" id="moderator-confidence">-</div></div>
+                <div class="card"><div class="label">Mode</div><div class="value" id="response-mode">-</div></div>
+              </div>
+              <div class="verdict">
+                <div>
+                  <div class="label">One-liner</div>
+                  <div style="font-size:20px; font-weight:700; margin-top:8px;" id="one-liner">-</div>
+                </div>
+                <div id="verdict-pill"></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <h2>Moderator Summary</h2>
+              <div class="lists">
+                <div class="card">
+                  <div class="label">Consensus</div>
+                  <ul id="consensus" class="clean"></ul>
+                </div>
+                <div class="card">
+                  <div class="label">Disagreements</div>
+                  <ul id="disagreements" class="clean"></ul>
+                </div>
+              </div>
+              <div class="card" style="margin-top:14px;">
+                <div class="label">Final Reasoning</div>
+                <div id="final-reasoning" style="margin-top:10px; color: var(--muted); line-height:1.7;"></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <h2>Agent Evaluations</h2>
+              <div id="agents-grid" class="agents-grid"></div>
+            </div>
+
+            <div class="panel">
+              <h2>Debate Timeline</h2>
+              <div id="debate-list" class="debate-list"></div>
+            </div>
+
+            <div class="panel">
+              <h2>Next Actions</h2>
+              <div class="lists">
+                <div class="card">
+                  <div class="label">Top Strengths</div>
+                  <ul id="top-strengths" class="clean"></ul>
+                </div>
+                <div class="card">
+                  <div class="label">Top Risks</div>
+                  <ul id="top-risks" class="clean"></ul>
+                </div>
+              </div>
+              <div class="card" style="margin-top:14px;">
+                <div class="label">Next Actions</div>
+                <ul id="next-actions" class="clean"></ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const form = document.getElementById('idea-form');
+      const fillDemoBtn = document.getElementById('fill-demo');
+      const errorBox = document.getElementById('error');
+      const serverModeEl = document.getElementById('server-mode');
+      const resultEmpty = document.getElementById('result-empty');
+      const resultWrap = document.getElementById('result-wrap');
+
+      const demoData = {
+        title: 'Startup Jury',
+        summary: '예비 창업자가 아이디어를 입력하면 VC, 시장, 기술, 성장, 리스크 에이전트가 평가하고 토론한 뒤 moderator가 최종 사업성 판단을 제공하는 서비스',
+        targetCustomer: '예비 창업자와 초기 스타트업 팀',
+        customerSegment: '해커톤 참가자, 대학생 창업팀, 1인 창업 준비생',
+        problem: '창업 아이디어 검증이 느리고 주관적이며, 다양한 전문가 관점을 한 번에 얻기 어렵다',
+        solution: '다중 역할 AI 에이전트가 사업성, 시장성, 구현 가능성, 성장성, 리스크를 평가하고 debate 후 moderator가 결론을 정리한다',
+        uniqueValue: '단순 요약이 아니라 역할별 토론과 moderator 종합 판단까지 제공한다',
+        revenueModel: 'B2B SaaS 구독 + 프리미엄 리포트',
+        pricingHint: '월 29달러 팀 플랜',
+        acquisitionChannel: '창업 커뮤니티, 대학 창업센터, 해커톤 파트너십',
+        marketRegion: 'Korea',
+        whyNow: '생성형 AI 사용이 대중화되면서 빠른 아이디어 검증 자동화 수요가 증가했다',
+        teamStrength: 'LLM 앱 개발 경험과 빠른 프로토타이핑 경험이 있다',
+        mvpScope: '아이디어 입력, 역할별 평가, debate, moderator 결과 리포트',
+        competitors: 'ChatGPT, CB Insights, PitchBook',
+        stage: 'idea'
+      };
+
+      fillDemoBtn.addEventListener('click', () => {
+        Object.entries(demoData).forEach(([key, value]) => {
+          const field = form.elements.namedItem(key);
+          if (field) field.value = value;
+        });
+      });
+
+      async function fetchHealth() {
+        try {
+          const res = await fetch('/health');
+          const data = await res.json();
+          serverModeEl.textContent = data.mode === 'llm' ? 'LLM' : 'Fallback';
+        } catch {
+          serverModeEl.textContent = '연결 실패';
+        }
+      }
+
+      function liItems(items) {
+        if (!items || items.length === 0) return '<li>없음</li>';
+        return items.map((item) => `<li>${item}</li>`).join('');
+      }
+
+      function verdictPillClass(verdict) {
+        return verdict === 'invest' ? 'invest' : verdict === 'watch' ? 'watch' : 'pass';
+      }
+
+      function renderAgents(evaluations) {
+        const grid = document.getElementById('agents-grid');
+        const breakdownLabels = {
+          problemClarity: '문제정의',
+          marketAttractiveness: '시장성',
+          feasibility: '실현가능성',
+          businessModelStrength: '수익모델',
+          growthPotential: '성장성',
+          riskReadiness: '리스크 대응'
+        };
+        grid.innerHTML = evaluations.map((agent) => {
+          const bars = Object.entries(agent.scoreBreakdown || {}).map(([key, value]) => `
+            <div class="bar-row">
+              <div>${breakdownLabels[key] || key}</div>
+              <div class="bar"><span style="width:${value}%"></span></div>
+              <div>${value}</div>
+            </div>
+          `).join('');
+
+          return `
+            <div class="card">
+              <div class="agent-title">
+                <div>
+                  <div class="label">${agent.role.toUpperCase()} Agent</div>
+                  <div style="font-size:18px; font-weight:800; margin-top:4px;">${agent.summary}</div>
+                </div>
+                <div class="score">${agent.score}</div>
+              </div>
+              <div class="chips">${agent.strengths.map((s) => `<span class="chip">${s}</span>`).join('')}</div>
+              <div class="bars">${bars}</div>
+              <div class="lists" style="margin-top:14px;">
+                <div>
+                  <div class="label">Concerns</div>
+                  <ul class="clean">${liItems(agent.concerns)}</ul>
+                </div>
+                <div>
+                  <div class="label">Recommendations</div>
+                  <ul class="clean">${liItems(agent.recommendations)}</ul>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function renderDebate(debate) {
+        const container = document.getElementById('debate-list');
+        container.innerHTML = debate.map((item) => `
+          <div class="debate-item">
+            <strong>${item.role.toUpperCase()} · ${item.stance} · revised ${item.revisedScore}</strong>
+            <div style="color:var(--muted); margin-bottom:8px;">동의: ${(item.agreesWith || []).join(', ') || '없음'}</div>
+            <ul class="clean">${liItems(item.rebuttals)}</ul>
+            <div style="margin-top:8px; color:#dce6ff;">${item.closingNote}</div>
+          </div>
+        `).join('');
+      }
+
+      function renderResult(data) {
+        resultEmpty.style.display = 'none';
+        resultWrap.style.display = 'grid';
+
+        document.getElementById('overall-score').textContent = data.finalAssessment.overallScore;
+        document.getElementById('overall-verdict').textContent = data.finalAssessment.investmentVerdict.toUpperCase();
+        document.getElementById('moderator-confidence').textContent = data.moderator.confidence;
+        document.getElementById('response-mode').textContent = data.meta.usedLLM ? 'LLM' : 'Fallback';
+        document.getElementById('one-liner').textContent = data.finalAssessment.oneLiner;
+        document.getElementById('verdict-pill').innerHTML = `<span class="pill ${verdictPillClass(data.finalAssessment.investmentVerdict)}">${data.finalAssessment.investmentVerdict.toUpperCase()}</span>`;
+
+        document.getElementById('consensus').innerHTML = liItems(data.moderator.consensus);
+        document.getElementById('disagreements').innerHTML = liItems(data.moderator.disagreements);
+        document.getElementById('final-reasoning').textContent = data.moderator.finalReasoning;
+        document.getElementById('top-strengths').innerHTML = liItems(data.finalAssessment.topStrengths);
+        document.getElementById('top-risks').innerHTML = liItems(data.finalAssessment.topRisks);
+        document.getElementById('next-actions').innerHTML = liItems(data.finalAssessment.nextActions);
+
+        renderAgents(data.evaluations || []);
+        renderDebate(data.debate || []);
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errorBox.style.display = 'none';
+        const formData = new FormData(form);
+        const payload = Object.fromEntries(formData.entries());
+        if (payload.competitors) {
+          payload.competitors = String(payload.competitors).split(',').map(v => v.trim()).filter(Boolean);
+        } else {
+          delete payload.competitors;
+        }
+
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = '평가 중...';
+
+        try {
+          const res = await fetch('/evaluate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data?.error || '요청 실패');
+          }
+          renderResult(data);
+        } catch (err) {
+          errorBox.style.display = 'block';
+          errorBox.textContent = err.message || '알 수 없는 오류가 발생했습니다.';
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+        }
+      });
+
+      fetchHealth();
+      fillDemoBtn.click();
+    </script>
+  </body>
+</html>
