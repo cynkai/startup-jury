@@ -1,0 +1,59 @@
+import cors from 'cors';
+import express from 'express';
+
+import { config, hasOpenAi } from './config.js';
+import { evaluateWithFallback } from './fallbackEvaluator.js';
+import { evaluateWithLLM } from './llmEvaluator.js';
+import { startupIdeaSchema } from './schema.js';
+
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+app.get('/health', (_req, res) => {
+  res.json({ ok: true, service: 'startup-jury-backend' });
+});
+
+app.get('/agents', (_req, res) => {
+  res.json({
+    agents: [
+      { role: 'vc', name: 'VC Agent' },
+      { role: 'market', name: 'Market Agent' },
+      { role: 'tech', name: 'Tech Agent' },
+      { role: 'growth', name: 'Growth Agent' },
+      { role: 'risk', name: 'Risk Agent' },
+    ],
+  });
+});
+
+app.post('/evaluate', async (req, res) => {
+  const parsed = startupIdeaSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({
+      error: 'Invalid request body',
+      details: parsed.error.flatten(),
+    });
+  }
+
+  try {
+    const result = hasOpenAi
+      ? await evaluateWithLLM(parsed.data)
+      : evaluateWithFallback(parsed.data);
+
+    return res.json(result);
+  } catch (error) {
+    const fallbackResult = evaluateWithFallback(parsed.data);
+    return res.status(200).json({
+      ...fallbackResult,
+      meta: {
+        ...fallbackResult.meta,
+        llmError: error instanceof Error ? error.message : 'Unknown LLM error',
+      },
+    });
+  }
+});
+
+app.listen(config.port, () => {
+  console.log(`Startup Jury backend listening on http://localhost:${config.port}`);
+});
