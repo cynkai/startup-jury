@@ -8,6 +8,13 @@
 - Tech Agent
 - Growth Agent
 - Risk Agent
+- Moderator Agent
+
+## 현재 백엔드 흐름
+1. 역할별 1차 평가
+2. 에이전트 간 debate(반박/보완)
+3. Moderator 종합 정리
+4. 최종 투자 판정 및 next actions 반환
 
 ## 실행
 ```bash

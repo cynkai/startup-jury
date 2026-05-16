@@ -17,3 +17,8 @@ export function investmentVerdictFromScore(score: number): 'invest' | 'watch' | 
 export function uniqueNonEmpty(items: Array<string | undefined>): string[] {
   return [...new Set(items.map((item) => item?.trim()).filter(Boolean) as string[])];
 }
+
+export function average(values: number[]): number {
+  if (values.length === 0) return 0;
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+}

@@ -12,18 +12,19 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/health', (_req, res) => {
-  res.json({ ok: true, service: 'startup-jury-backend' });
+  res.json({ ok: true, service: 'startup-jury-backend', mode: hasOpenAi ? 'llm' : 'fallback' });
 });
 
 app.get('/agents', (_req, res) => {
   res.json({
     agents: [
-      { role: 'vc', name: 'VC Agent' },
-      { role: 'market', name: 'Market Agent' },
-      { role: 'tech', name: 'Tech Agent' },
-      { role: 'growth', name: 'Growth Agent' },
-      { role: 'risk', name: 'Risk Agent' },
+      { role: 'vc', name: 'VC Agent', focus: 'investment attractiveness, moat, scalability, and fundability' },
+      { role: 'market', name: 'Market Agent', focus: 'customer pain, market demand, timing, and competition' },
+      { role: 'tech', name: 'Tech Agent', focus: 'technical feasibility, MVP scope, execution complexity, and defensibility' },
+      { role: 'growth', name: 'Growth Agent', focus: 'go-to-market strategy, retention, distribution, and monetization' },
+      { role: 'risk', name: 'Risk Agent', focus: 'regulatory, operational, adoption, trust, and failure risks' },
     ],
+    moderator: { role: 'moderator', name: 'Moderator Agent', focus: 'synthesize consensus, disagreements, and final investment reasoning' },
   });
 });
 
