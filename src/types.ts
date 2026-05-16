@@ -3,21 +3,33 @@ export type TranscriptSpeaker = AgentRole | 'moderator';
 
 export interface StartupIdeaInput {
   title: string;
-  summary: string;
-  targetCustomer?: string;
-  customerSegment?: string;
-  problem?: string;
-  solution?: string;
-  uniqueValue?: string;
-  revenueModel?: string;
-  pricingHint?: string;
-  acquisitionChannel?: string;
-  marketRegion?: string;
-  whyNow?: string;
-  teamStrength?: string;
-  mvpScope?: string;
-  competitors?: string[];
-  stage?: 'idea' | 'prototype' | 'mvp' | 'launched';
+  pitch: string;
+  notes?: string;
+}
+
+export interface NormalizedIdea {
+  title: string;
+  pitch: string;
+  notes?: string;
+  combinedText: string;
+  signals: {
+    hasProblem: boolean;
+    hasSolution: boolean;
+    hasTarget: boolean;
+    hasRevenue: boolean;
+    hasCompetition: boolean;
+    hasPricing: boolean;
+    hasAcquisition: boolean;
+    hasWhyNow: boolean;
+    hasTeam: boolean;
+    hasMvp: boolean;
+    isHardware: boolean;
+    isRegulated: boolean;
+    isAiNative: boolean;
+    isB2b: boolean;
+    isMarketplace: boolean;
+    mentionsCommunity: boolean;
+  };
 }
 
 export interface ScoreBreakdown {
@@ -53,6 +65,7 @@ export interface DebateTranscriptMessage {
   id: string;
   speaker: TranscriptSpeaker;
   phase: 'opening' | 'challenge' | 'response' | 'moderation' | 'verdict';
+  addressedTo?: TranscriptSpeaker;
   text: string;
 }
 
@@ -74,6 +87,7 @@ export interface FinalAssessment {
 
 export interface EvaluationResponse {
   input: StartupIdeaInput;
+  normalized: NormalizedIdea;
   evaluations: AgentEvaluation[];
   debate: AgentDebateTurn[];
   transcript: DebateTranscriptMessage[];

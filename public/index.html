@@ -3,85 +3,75 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Startup Jury</title>
+    <title>Startup Jury · AI 투자심사 패널</title>
     <style>
       :root {
-        --bg: #f5f7fb;
-        --bg-2: #eef2ff;
-        --panel: rgba(255, 255, 255, 0.82);
-        --panel-strong: rgba(255, 255, 255, 0.96);
-        --line: rgba(15, 23, 42, 0.08);
-        --line-strong: rgba(15, 23, 42, 0.14);
-        --text: #0f172a;
-        --muted: #5b6475;
-        --muted-2: #8a92a3;
-        --accent: #5b7cff;
-        --accent-2: #7c3aed;
-        --green: #16a34a;
-        --yellow: #d97706;
-        --red: #dc2626;
-        --shadow: 0 24px 60px rgba(48, 68, 120, 0.14);
+        --bg: #0b1124;
+        --bg-2: #131a36;
+        --panel: rgba(255, 255, 255, 0.06);
+        --panel-strong: rgba(255, 255, 255, 0.1);
+        --border: rgba(255, 255, 255, 0.08);
+        --border-strong: rgba(255, 255, 255, 0.14);
+        --text: #f4f7ff;
+        --muted: #b3bbd4;
+        --muted-2: #8089a8;
+        --accent: #7c9cff;
+        --accent-2: #c084fc;
+        --green: #4ade80;
+        --yellow: #fbbf24;
+        --red: #f87171;
+        --shadow: 0 30px 70px rgba(7, 12, 30, 0.55);
         --radius-xl: 28px;
-        --radius-lg: 20px;
+        --radius-lg: 22px;
         --radius-md: 16px;
       }
-
       * { box-sizing: border-box; }
       html, body { margin: 0; padding: 0; }
       body {
         font-family: Inter, Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         color: var(--text);
         background:
-          radial-gradient(circle at top left, rgba(91,124,255,0.16), transparent 28%),
-          radial-gradient(circle at top right, rgba(124,58,237,0.14), transparent 24%),
-          linear-gradient(180deg, #f8faff 0%, #eef3ff 100%);
+          radial-gradient(900px 600px at -10% -10%, rgba(124,156,255,0.22), transparent 60%),
+          radial-gradient(800px 600px at 110% 0%, rgba(192,132,252,0.18), transparent 60%),
+          linear-gradient(180deg, #08102a 0%, #0b1124 100%);
+        min-height: 100vh;
       }
-
       .hidden { display: none !important; }
       .app-shell { min-height: 100vh; }
       .container { width: min(1380px, calc(100% - 32px)); margin: 0 auto; }
+
+      .glass {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        backdrop-filter: blur(24px);
+        box-shadow: var(--shadow);
+      }
+
+      h1, h2, h3, h4 { margin: 0; letter-spacing: -0.02em; }
 
       .login-screen {
         min-height: 100vh;
         display: grid;
         place-items: center;
-        padding: 24px;
+        padding: 28px 16px;
       }
 
       .login-card {
-        width: min(1120px, 100%);
+        width: min(1080px, 100%);
         display: grid;
-        grid-template-columns: 1.15fr 0.85fr;
-        gap: 22px;
-        background: rgba(255,255,255,0.42);
-        border: 1px solid rgba(255,255,255,0.6);
-        box-shadow: var(--shadow);
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 20px;
         border-radius: 32px;
-        backdrop-filter: blur(24px);
         padding: 22px;
-      }
-
-      .login-hero, .login-panel, .glass, .surface {
-        background: var(--panel);
-        border: 1px solid rgba(255,255,255,0.8);
-        box-shadow: var(--shadow);
-        backdrop-filter: blur(20px);
       }
 
       .login-hero {
         border-radius: 28px;
-        padding: 34px;
+        padding: 36px;
         position: relative;
         overflow: hidden;
-      }
-
-      .gradient-orb {
-        position: absolute;
-        inset: auto -80px -110px auto;
-        width: 240px;
-        height: 240px;
-        background: radial-gradient(circle, rgba(124,58,237,0.34), transparent 62%);
-        pointer-events: none;
+        background: linear-gradient(155deg, rgba(124,156,255,0.18), rgba(192,132,252,0.12));
+        border: 1px solid rgba(255,255,255,0.1);
       }
 
       .badge {
@@ -89,80 +79,81 @@
         align-items: center;
         gap: 8px;
         border-radius: 999px;
-        padding: 9px 14px;
-        background: rgba(91,124,255,0.12);
-        color: var(--accent);
-        font-size: 13px;
-        font-weight: 700;
+        padding: 8px 14px;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: var(--text);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
       }
 
-      h1, h2, h3 { margin: 0; }
-      .login-title {
-        font-size: clamp(36px, 6vw, 62px);
+      .display {
+        font-size: clamp(36px, 6.4vw, 64px);
         line-height: 1.02;
-        margin: 18px 0 14px;
         letter-spacing: -0.04em;
+        margin: 18px 0 12px;
       }
 
       .lead {
         color: var(--muted);
-        font-size: 17px;
-        line-height: 1.78;
-        max-width: 720px;
+        font-size: 16px;
+        line-height: 1.8;
+        max-width: 620px;
       }
 
       .hero-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
-        margin-top: 28px;
+        gap: 10px;
+        margin-top: 26px;
       }
 
       .hero-stat {
-        border-radius: 20px;
-        padding: 16px;
-        background: rgba(255,255,255,0.6);
-        border: 1px solid rgba(15,23,42,0.06);
+        border-radius: 18px;
+        padding: 14px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.07);
       }
-
-      .hero-stat .v { font-size: 28px; font-weight: 800; }
-      .hero-stat .l { font-size: 13px; color: var(--muted); margin-top: 6px; }
+      .hero-stat .v { font-size: 20px; font-weight: 900; }
+      .hero-stat .l { font-size: 12px; color: var(--muted); margin-top: 6px; }
 
       .login-panel {
         border-radius: 28px;
-        padding: 26px;
+        padding: 28px;
         display: flex;
         flex-direction: column;
         justify-content: center;
+        gap: 12px;
       }
 
-      .panel-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
-      .panel-desc { color: var(--muted); line-height: 1.7; margin-bottom: 22px; }
+      .panel-title { font-size: 22px; font-weight: 800; }
+      .panel-desc { color: var(--muted); line-height: 1.7; font-size: 14px; }
 
-      .field { display: grid; gap: 8px; margin-bottom: 14px; }
-      .field label { font-size: 13px; color: var(--muted); font-weight: 700; }
+      .field { display: grid; gap: 8px; }
+      .field label { font-size: 12px; color: var(--muted); font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
       input, textarea, select {
         width: 100%;
-        border: 1px solid rgba(15,23,42,0.09);
-        background: rgba(255,255,255,0.9);
+        background: rgba(255,255,255,0.06);
         color: var(--text);
-        border-radius: 16px;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 14px;
         padding: 14px 15px;
-        font-size: 14px;
+        font-size: 15px;
         outline: none;
-        transition: .18s ease;
+        transition: border-color .15s ease, box-shadow .15s ease;
       }
-      textarea { min-height: 96px; resize: vertical; }
+      textarea { min-height: 140px; resize: vertical; line-height: 1.7; }
       input:focus, textarea:focus, select:focus {
-        border-color: rgba(91,124,255,0.42);
-        box-shadow: 0 0 0 5px rgba(91,124,255,0.12);
+        border-color: rgba(124,156,255,0.55);
+        box-shadow: 0 0 0 5px rgba(124,156,255,0.12);
       }
 
-      .mini-note { font-size: 12px; color: var(--muted-2); margin-top: 4px; }
+      .mini-note { font-size: 12px; color: var(--muted-2); }
       .actions { display: flex; gap: 10px; flex-wrap: wrap; }
       button {
         border: 0;
-        border-radius: 16px;
+        border-radius: 14px;
         padding: 14px 18px;
         font-size: 14px;
         font-weight: 800;
@@ -170,51 +161,49 @@
         transition: transform .12s ease, box-shadow .18s ease, opacity .18s ease;
       }
       button:hover { transform: translateY(-1px); }
-      button:disabled { opacity: .65; cursor: wait; transform: none; }
+      button:disabled { opacity: .55; cursor: wait; transform: none; }
       .primary-btn {
         background: linear-gradient(135deg, var(--accent), var(--accent-2));
-        color: white;
-        box-shadow: 0 10px 30px rgba(91,124,255,0.24);
+        color: #08111f;
+        box-shadow: 0 14px 30px rgba(124,156,255,0.34);
       }
       .secondary-btn {
-        background: rgba(255,255,255,0.9);
+        background: rgba(255,255,255,0.08);
         color: var(--text);
-        border: 1px solid rgba(15,23,42,0.08);
+        border: 1px solid rgba(255,255,255,0.12);
+      }
+      .ghost-btn {
+        background: transparent;
+        color: var(--muted);
+        border: 1px dashed rgba(255,255,255,0.16);
       }
 
-      .dashboard {
-        padding: 26px 0 34px;
-      }
+      .dashboard { padding: 28px 0 60px; }
 
       .topbar {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 14px;
-        margin-bottom: 20px;
+        gap: 12px;
+        margin-bottom: 22px;
       }
 
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-      }
-
+      .brand { display: flex; align-items: center; gap: 14px; }
       .brand-badge {
-        width: 52px;
-        height: 52px;
-        border-radius: 18px;
+        width: 54px;
+        height: 54px;
+        border-radius: 20px;
         display: grid;
         place-items: center;
         background: linear-gradient(135deg, var(--accent), var(--accent-2));
-        color: white;
+        color: #0b1124;
         font-weight: 900;
-        font-size: 18px;
-        box-shadow: 0 14px 28px rgba(91,124,255,0.2);
+        font-size: 17px;
+        box-shadow: 0 18px 34px rgba(124,156,255,0.32);
       }
 
-      .brand-copy h2 { font-size: 26px; letter-spacing: -0.03em; }
-      .brand-copy p { margin: 4px 0 0; color: var(--muted); }
+      .brand-copy h2 { font-size: 24px; }
+      .brand-copy p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
 
       .status-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
       .status-pill {
@@ -222,71 +211,79 @@
         align-items: center;
         gap: 8px;
         border-radius: 999px;
-        padding: 10px 14px;
-        background: rgba(255,255,255,0.74);
-        border: 1px solid rgba(15,23,42,0.07);
+        padding: 9px 14px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.08);
         color: var(--muted);
         font-size: 13px;
         font-weight: 700;
       }
 
-      .dashboard-grid {
+      .layout {
         display: grid;
-        grid-template-columns: 430px 1fr;
-        gap: 20px;
+        grid-template-columns: 420px 1fr;
+        gap: 22px;
       }
 
       .surface {
         border-radius: var(--radius-xl);
-        padding: 22px;
+        padding: 24px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        backdrop-filter: blur(20px);
       }
+      .surface h3 { font-size: 20px; }
 
       .surface-title {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 8px;
+        gap: 10px;
         margin-bottom: 14px;
       }
 
-      .surface-title h3 {
-        font-size: 22px;
-        letter-spacing: -0.03em;
-      }
+      .left-pane { position: sticky; top: 20px; align-self: start; }
 
-      .muted { color: var(--muted); }
-      .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-      .left-form { position: sticky; top: 20px; align-self: start; }
-      .form-scroll { max-height: calc(100vh - 110px); overflow: auto; padding-right: 4px; }
+      .form-fields { display: grid; gap: 14px; }
 
       .summary-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 12px;
-        margin-bottom: 16px;
       }
 
       .metric-card {
         border-radius: 20px;
         padding: 18px;
-        background: rgba(255,255,255,0.86);
-        border: 1px solid rgba(15,23,42,0.06);
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.08);
       }
-      .metric-label { font-size: 12px; font-weight: 800; color: var(--muted-2); text-transform: uppercase; letter-spacing: .08em; }
-      .metric-value { margin-top: 8px; font-size: 30px; font-weight: 900; letter-spacing: -0.04em; }
+      .metric-label {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        color: var(--muted-2);
+        text-transform: uppercase;
+      }
+      .metric-value {
+        margin-top: 8px;
+        font-size: 30px;
+        font-weight: 900;
+        letter-spacing: -0.04em;
+      }
 
       .hero-summary {
         display: grid;
         grid-template-columns: 1.2fr 0.8fr;
         gap: 14px;
-        margin-bottom: 18px;
+        margin-top: 18px;
       }
 
-      .highlight-card, .side-card {
-        border-radius: 24px;
+      .highlight-card, .side-card, .list-card {
+        border-radius: 22px;
         padding: 20px;
-        background: rgba(255,255,255,0.9);
-        border: 1px solid rgba(15,23,42,0.06);
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.07);
       }
 
       .highlight-head {
@@ -294,12 +291,12 @@
         justify-content: space-between;
         align-items: flex-start;
         gap: 14px;
-        margin-bottom: 14px;
+        margin-bottom: 12px;
       }
 
       .big-line {
-        font-size: 24px;
-        line-height: 1.4;
+        font-size: 22px;
+        line-height: 1.45;
         font-weight: 800;
         letter-spacing: -0.03em;
       }
@@ -307,160 +304,145 @@
       .pill {
         display: inline-flex;
         align-items: center;
-        justify-content: center;
         gap: 6px;
         padding: 8px 12px;
         border-radius: 999px;
         font-size: 12px;
         font-weight: 800;
       }
-      .pill.invest { background: rgba(22,163,74,0.12); color: var(--green); }
-      .pill.watch { background: rgba(217,119,6,0.12); color: var(--yellow); }
-      .pill.pass { background: rgba(220,38,38,0.12); color: var(--red); }
+      .pill.invest { background: rgba(74,222,128,0.14); color: var(--green); }
+      .pill.watch { background: rgba(251,191,36,0.14); color: var(--yellow); }
+      .pill.pass { background: rgba(248,113,113,0.14); color: var(--red); }
 
-      .mini-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-      }
-
-      .list-card {
-        border-radius: 20px;
-        padding: 18px;
-        background: rgba(255,255,255,0.9);
-        border: 1px solid rgba(15,23,42,0.06);
-      }
-
+      .mini-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
       .list-title {
-        font-size: 13px;
+        font-size: 11px;
         font-weight: 800;
+        letter-spacing: 0.1em;
         color: var(--muted-2);
         text-transform: uppercase;
-        letter-spacing: .08em;
+        margin-bottom: 10px;
       }
+      ul.clean { margin: 0; padding-left: 18px; color: var(--muted); line-height: 1.8; }
 
-      ul.clean {
-        margin: 12px 0 0;
-        padding-left: 18px;
-        color: var(--muted);
-        line-height: 1.8;
+      .transcript-shell {
+        border-radius: var(--radius-xl);
+        padding: 24px;
+        background: rgba(8,15,38,0.7);
+        border: 1px solid rgba(255,255,255,0.08);
+        backdrop-filter: blur(24px);
+        min-height: 280px;
+        display: grid;
+        gap: 14px;
       }
 
       .transcript {
         display: grid;
         gap: 14px;
+        align-content: start;
       }
 
-      .chat-bubble {
+      .chat-row {
         display: grid;
-        grid-template-columns: 48px 1fr;
+        align-items: flex-end;
         gap: 12px;
-        align-items: start;
       }
+      .chat-row.left { grid-template-columns: 44px 1fr; }
+      .chat-row.right { grid-template-columns: 1fr 44px; }
 
       .avatar {
-        width: 48px;
-        height: 48px;
+        width: 44px;
+        height: 44px;
         border-radius: 16px;
         display: grid;
         place-items: center;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 900;
-        color: white;
-        box-shadow: 0 10px 24px rgba(31,41,55,0.1);
+        color: #08111f;
+        box-shadow: 0 10px 24px rgba(8,15,38,0.45);
+      }
+      .avatar.vc { background: linear-gradient(135deg, #60a5fa, #38bdf8); }
+      .avatar.market { background: linear-gradient(135deg, #c084fc, #f472b6); }
+      .avatar.tech { background: linear-gradient(135deg, #34d399, #14b8a6); }
+      .avatar.growth { background: linear-gradient(135deg, #fb923c, #f59e0b); }
+      .avatar.risk { background: linear-gradient(135deg, #f87171, #fb7185); }
+      .avatar.moderator { background: linear-gradient(135deg, #cbd5f5, #94a3b8); color: #0b1124; }
+
+      .bubble {
+        max-width: min(680px, 100%);
+        border-radius: 20px;
+        padding: 14px 16px;
+        background: rgba(255,255,255,0.07);
+        border: 1px solid rgba(255,255,255,0.1);
+        position: relative;
+        line-height: 1.75;
+        font-size: 15px;
+        white-space: pre-wrap;
+        color: var(--text);
       }
 
-      .avatar.vc { background: linear-gradient(135deg, #2563eb, #38bdf8); }
-      .avatar.market { background: linear-gradient(135deg, #7c3aed, #ec4899); }
-      .avatar.tech { background: linear-gradient(135deg, #0f766e, #14b8a6); }
-      .avatar.growth { background: linear-gradient(135deg, #ea580c, #f59e0b); }
-      .avatar.risk { background: linear-gradient(135deg, #dc2626, #fb7185); }
-      .avatar.moderator { background: linear-gradient(135deg, #334155, #64748b); }
-
-      .bubble-card {
-        background: rgba(255,255,255,0.94);
-        border: 1px solid rgba(15,23,42,0.08);
-        border-radius: 22px;
-        padding: 16px 18px;
+      .chat-row.left .bubble { border-bottom-left-radius: 6px; }
+      .chat-row.right .bubble {
+        justify-self: end;
+        background: linear-gradient(135deg, rgba(124,156,255,0.25), rgba(192,132,252,0.22));
+        border-color: rgba(124,156,255,0.35);
+        border-bottom-right-radius: 6px;
       }
 
       .bubble-top {
         display: flex;
         align-items: center;
         gap: 8px;
+        margin-bottom: 6px;
         flex-wrap: wrap;
-        margin-bottom: 8px;
       }
-
-      .bubble-name { font-weight: 900; }
+      .bubble-name { font-weight: 800; font-size: 13px; }
       .phase-tag {
-        font-size: 11px;
-        font-weight: 800;
-        color: var(--muted-2);
-        padding: 6px 8px;
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 4px 8px;
         border-radius: 999px;
-        background: rgba(15,23,42,0.05);
+        background: rgba(255,255,255,0.08);
+        color: var(--muted);
+      }
+      .reply-tag {
+        font-size: 11px;
+        color: var(--muted-2);
       }
 
-      .bubble-text {
-        color: #1e293b;
-        line-height: 1.8;
-        font-size: 15px;
+      .typing { display: inline-flex; gap: 4px; }
+      .typing span {
+        width: 6px; height: 6px; border-radius: 50%;
+        background: rgba(255,255,255,0.6);
+        animation: blink 1.2s infinite ease-in-out;
+      }
+      .typing span:nth-child(2) { animation-delay: .2s; }
+      .typing span:nth-child(3) { animation-delay: .4s; }
+      @keyframes blink {
+        0%, 100% { opacity: 0.2; transform: translateY(0); }
+        50% { opacity: 1; transform: translateY(-2px); }
       }
 
-      .section-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-      }
-
-      .agents-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 14px;
-      }
-
+      .agents-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
       .agent-card {
         border-radius: 22px;
         padding: 18px;
-        background: rgba(255,255,255,0.92);
-        border: 1px solid rgba(15,23,42,0.07);
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.08);
       }
-
-      .agent-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: start;
-        gap: 10px;
-      }
-
-      .agent-role {
-        font-size: 12px;
-        color: var(--muted-2);
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: .08em;
-      }
-
-      .agent-score {
-        font-size: 28px;
-        font-weight: 900;
-        letter-spacing: -0.04em;
-      }
-
-      .agent-summary {
-        margin-top: 8px;
-        font-size: 16px;
-        font-weight: 700;
-        line-height: 1.5;
-      }
+      .agent-head { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+      .agent-role { font-size: 11px; color: var(--muted-2); font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
+      .agent-score { font-size: 28px; font-weight: 900; letter-spacing: -0.04em; }
+      .agent-summary { margin-top: 8px; font-size: 15px; font-weight: 700; line-height: 1.55; }
 
       .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
       .chip {
-        padding: 7px 10px;
+        padding: 6px 10px;
         border-radius: 999px;
-        background: rgba(91,124,255,0.09);
-        color: #4056a1;
+        background: rgba(124,156,255,0.12);
+        color: #cdd5ff;
         font-size: 12px;
         font-weight: 700;
       }
@@ -474,92 +456,72 @@
         font-size: 12px;
         color: var(--muted);
       }
-      .bar {
-        height: 8px;
-        border-radius: 999px;
-        background: rgba(15,23,42,0.06);
-        overflow: hidden;
-      }
-      .bar > span {
-        display: block;
-        height: 100%;
-        border-radius: 999px;
-        background: linear-gradient(90deg, var(--accent), var(--accent-2));
-      }
+      .bar { height: 8px; border-radius: 999px; background: rgba(255,255,255,0.06); overflow: hidden; }
+      .bar > span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
 
       .debate-card {
         border-radius: 22px;
         padding: 18px;
-        background: rgba(255,255,255,0.92);
-        border: 1px solid rgba(15,23,42,0.07);
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
       }
+      .debate-title { font-size: 16px; font-weight: 800; margin-bottom: 6px; }
+      .debate-meta { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
 
-      .debate-title { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
-      .debate-meta { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
-
-      .error {
-        background: rgba(220,38,38,0.07);
-        color: var(--red);
-        border: 1px solid rgba(220,38,38,0.12);
-        border-radius: 16px;
-        padding: 12px 14px;
-        margin-bottom: 14px;
-        font-size: 14px;
-      }
+      .section-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
       .empty-state {
         display: grid;
         place-items: center;
-        min-height: 320px;
+        min-height: 240px;
         text-align: center;
         color: var(--muted);
         border-radius: 24px;
-        background: rgba(255,255,255,0.72);
-        border: 1px dashed rgba(15,23,42,0.12);
+        background: rgba(255,255,255,0.03);
+        border: 1px dashed rgba(255,255,255,0.12);
+        padding: 24px;
       }
 
-      .login-footer { margin-top: 18px; color: var(--muted-2); font-size: 12px; }
+      .error {
+        background: rgba(248,113,113,0.1);
+        color: #fecaca;
+        border: 1px solid rgba(248,113,113,0.25);
+        border-radius: 14px;
+        padding: 12px 14px;
+        font-size: 14px;
+      }
 
       @media (max-width: 1080px) {
-        .login-card, .dashboard-grid, .hero-summary, .section-grid { grid-template-columns: 1fr; }
-        .summary-grid, .agents-grid, .mini-grid { grid-template-columns: 1fr 1fr; }
-        .left-form { position: static; }
-        .form-scroll { max-height: none; }
+        .login-card, .layout, .hero-summary, .section-grid { grid-template-columns: 1fr; }
+        .summary-grid, .agents-grid, .mini-grid, .hero-grid { grid-template-columns: 1fr 1fr; }
+        .left-pane { position: static; }
       }
-
-      @media (max-width: 760px) {
-        .summary-grid, .agents-grid, .mini-grid, .grid-2 { grid-template-columns: 1fr; }
+      @media (max-width: 720px) {
+        .summary-grid, .agents-grid, .mini-grid, .hero-grid { grid-template-columns: 1fr; }
         .topbar { flex-direction: column; align-items: flex-start; }
-        .login-card { padding: 14px; }
-        .login-hero, .login-panel, .surface { padding: 18px; }
-        .chat-bubble { grid-template-columns: 1fr; }
       }
     </style>
   </head>
   <body>
     <div class="app-shell">
       <section id="login-screen" class="login-screen">
-        <div class="login-card">
+        <div class="login-card glass">
           <div class="login-hero">
-            <div class="gradient-orb"></div>
-            <div class="badge">AI Investment Committee · Demo Access</div>
-            <div class="login-title">Startup Jury</div>
+            <div class="badge">AI Investment Committee</div>
+            <div class="display">Startup Jury</div>
             <div class="lead">
-              여러 역할의 AI 에이전트가 스타트업 아이디어를 실제 투자심사 패널처럼 검토하고,
-              서로 반박하고, moderator가 결론을 정리하는 멀티에이전트 평가 플랫폼.
+              스타트업 아이디어를 입력하면 VC, Market, Tech, Growth, Risk 다섯 에이전트가
+              실제 투자심사 패널처럼 토론하고, Moderator가 결론을 정리한다.
             </div>
             <div class="hero-grid">
-              <div class="hero-stat"><div class="v">5 Agents</div><div class="l">VC · Market · Tech · Growth · Risk</div></div>
-              <div class="hero-stat"><div class="v">Live Debate</div><div class="l">단답형이 아닌 토론 흐름</div></div>
-              <div class="hero-stat"><div class="v">Moderator</div><div class="l">합의점과 최종 판정 제시</div></div>
+              <div class="hero-stat"><div class="v">5 Agents</div><div class="l">서로 반박/보완하는 패널</div></div>
+              <div class="hero-stat"><div class="v">Live Debate</div><div class="l">단답이 아닌 토론 흐름</div></div>
+              <div class="hero-stat"><div class="v">Moderator</div><div class="l">합의·이견·최종 판정</div></div>
             </div>
           </div>
-
-          <div class="login-panel">
+          <div class="login-panel glass">
             <div class="panel-title">심사 패널 입장</div>
-            <div class="panel-desc">
-              실제 인증은 아니고 데모용 로그인이다. 이름과 역할만 넣고 들어가면 바로 투자심사 대시보드로 이동한다.
-            </div>
+            <div class="panel-desc">데모용 로그인이다. 이름과 역할만 적고 들어가면 바로 토론 화면으로 이동한다.</div>
             <div class="field">
               <label>이름</label>
               <input id="login-name" placeholder="예: Shanks" />
@@ -567,10 +529,10 @@
             <div class="field">
               <label>역할</label>
               <select id="login-role">
-                <option value="Founder">Founder</option>
-                <option value="Judge">Judge</option>
-                <option value="Investor">Investor</option>
-                <option value="Operator">Operator</option>
+                <option>Founder</option>
+                <option>Judge</option>
+                <option>Investor</option>
+                <option>Operator</option>
               </select>
             </div>
             <div class="field">
@@ -579,9 +541,9 @@
             </div>
             <div class="actions">
               <button id="enter-btn" class="primary-btn">대시보드 입장</button>
-              <button id="demo-login-btn" class="secondary-btn">데모 프로필 채우기</button>
+              <button id="demo-login-btn" class="ghost-btn">데모 프로필 채우기</button>
             </div>
-            <div class="login-footer">이 화면은 발표 흐름을 위해 추가된 진입 화면이다.</div>
+            <div class="mini-note">이 화면은 발표 흐름을 위해 추가된 진입 화면이다.</div>
           </div>
         </div>
       </section>
@@ -597,71 +559,67 @@
               </div>
             </div>
             <div class="status-row">
-              <div class="status-pill">Server Mode · <span id="server-mode">확인 중...</span></div>
+              <div class="status-pill">Server · <span id="server-mode">확인 중</span></div>
               <div class="status-pill">Session · <span id="session-user">-</span></div>
               <button id="logout-btn" class="secondary-btn">로그아웃</button>
             </div>
           </div>
 
-          <div class="dashboard-grid">
-            <div class="surface left-form">
+          <div class="layout">
+            <div class="surface left-pane">
               <div class="surface-title">
-                <h3>아이디어 입력</h3>
-                <span class="badge">Input Brief</span>
+                <h3>아이디어 한 단락</h3>
+                <span class="badge">Free-form Pitch</span>
               </div>
-              <div id="error" class="error hidden"></div>
-              <div class="form-scroll">
-                <form id="idea-form">
-                  <div class="field"><label>제목</label><input name="title" required /></div>
-                  <div class="field"><label>한 줄 요약</label><textarea name="summary" required></textarea></div>
-                  <div class="grid-2">
-                    <div class="field"><label>타깃 고객</label><input name="targetCustomer" /></div>
-                    <div class="field"><label>고객 세그먼트</label><input name="customerSegment" /></div>
-                  </div>
-                  <div class="field"><label>문제</label><textarea name="problem"></textarea></div>
-                  <div class="field"><label>해결 방법</label><textarea name="solution"></textarea></div>
-                  <div class="field"><label>차별점</label><textarea name="uniqueValue"></textarea></div>
-                  <div class="grid-2">
-                    <div class="field"><label>수익모델</label><input name="revenueModel" /></div>
-                    <div class="field"><label>가격 가설</label><input name="pricingHint" /></div>
-                  </div>
-                  <div class="grid-2">
-                    <div class="field"><label>초기 획득 채널</label><input name="acquisitionChannel" /></div>
-                    <div class="field"><label>시장 지역</label><input name="marketRegion" value="Korea" /></div>
-                  </div>
-                  <div class="field"><label>왜 지금인가</label><textarea name="whyNow"></textarea></div>
-                  <div class="grid-2">
-                    <div class="field"><label>팀 강점</label><textarea name="teamStrength"></textarea></div>
-                    <div class="field"><label>MVP 범위</label><textarea name="mvpScope"></textarea></div>
-                  </div>
-                  <div class="grid-2">
-                    <div class="field"><label>경쟁사 (쉼표 구분)</label><input name="competitors" /></div>
-                    <div class="field"><label>단계</label><select name="stage"><option>idea</option><option>prototype</option><option>mvp</option><option>launched</option></select></div>
-                  </div>
-                  <div class="actions" style="margin-top: 14px;">
-                    <button type="submit" class="primary-btn">투자심사 시작</button>
-                    <button type="button" class="secondary-btn" id="fill-demo">데모 입력</button>
-                  </div>
-                  <div class="mini-note">입력값이 풍부할수록 agent 토론과 moderator 판단이 더 자연스러워진다.</div>
-                </form>
-              </div>
+              <div id="error" class="error hidden" style="margin-bottom: 14px;"></div>
+              <form id="idea-form" class="form-fields">
+                <div class="field">
+                  <label>아이디어 제목</label>
+                  <input name="title" placeholder="예: Startup Jury" required />
+                </div>
+                <div class="field">
+                  <label>피치 (한 단락이면 충분하다)</label>
+                  <textarea name="pitch" placeholder="누구를 위한 어떤 서비스인지, 무엇이 문제인지, 어떻게 풀고 어떻게 돈을 벌 생각인지 자유롭게 적어라." required></textarea>
+                </div>
+                <div class="field">
+                  <label>덧붙이고 싶은 메모 (선택)</label>
+                  <textarea name="notes" placeholder="기술 스택, 팀 강점, 예상 가격, 첫 채널 등 떠오르는 대로." style="min-height: 100px;"></textarea>
+                </div>
+                <div class="actions">
+                  <button type="submit" class="primary-btn">투자심사 시작</button>
+                  <button type="button" class="ghost-btn" id="fill-demo">데모 아이디어 채우기</button>
+                </div>
+                <div class="mini-note">입력이 짧아도 에이전트가 합리적으로 추론한다. 한 단락이면 충분하다.</div>
+              </form>
             </div>
 
-            <div style="display:grid; gap:18px; align-content:start;">
+            <div style="display: grid; gap: 20px; align-content: start;">
               <div id="result-empty" class="empty-state">
                 <div>
-                  <h3 style="margin-bottom:10px; font-size:28px;">패널 토론 대기 중</h3>
-                  <div>왼쪽에서 스타트업 아이디어를 입력하면 에이전트들이 실제 회의처럼 대화하기 시작한다.</div>
+                  <h3 style="font-size: 22px; margin-bottom: 8px;">패널 토론 대기 중</h3>
+                  <div style="color: var(--muted);">왼쪽에 한 단락 적고 시작하면, 에이전트가 한 명씩 입장해 토론을 시작한다.</div>
                 </div>
               </div>
 
-              <div id="result-wrap" class="hidden" style="display:grid; gap:18px;">
+              <div id="result-wrap" class="hidden" style="display: grid; gap: 20px;">
                 <div class="surface">
                   <div class="summary-grid">
-                    <div class="metric-card"><div class="metric-label">Overall Score</div><div class="metric-value" id="overall-score">-</div></div>
-                    <div class="metric-card"><div class="metric-label">Investment Verdict</div><div class="metric-value" id="overall-verdict">-</div></div>
-                    <div class="metric-card"><div class="metric-label">Moderator Confidence</div><div class="metric-value" id="moderator-confidence">-</div></div>
-                    <div class="metric-card"><div class="metric-label">Response Mode</div><div class="metric-value" id="response-mode">-</div></div>
+                    <div class="metric-card">
+                      <div class="metric-label">Overall Score</div>
+                      <div class="metric-value" id="overall-score">-</div>
+                    </div>
+                    <div class="metric-card">
+                      <div class="metric-label">Investment Verdict</div>
+                      <div class="metric-value" id="overall-verdict">-</div>
+                    </div>
+                    <div class="metric-card">
+                      <div class="metric-label">Moderator Confidence</div>
+                      <div class="metric-value" id="moderator-confidence">-</div>
+                    </div>
+                    <div class="metric-card">
+                      <div class="metric-label">Response Mode</div>
+                      <div class="metric-value" id="response-mode">-</div>
+                    </div>
                   </div>
 
                   <div class="hero-summary">
@@ -673,15 +631,15 @@
                         </div>
                         <div id="verdict-pill"></div>
                       </div>
-                      <div class="muted" id="final-reasoning">-</div>
+                      <div class="muted" id="final-reasoning" style="color: var(--muted); line-height: 1.8;">-</div>
                     </div>
                     <div class="side-card">
                       <div class="metric-label">Moderator Consensus</div>
-                      <ul id="consensus" class="clean"></ul>
+                      <ul id="consensus" class="clean" style="margin-top: 10px;"></ul>
                     </div>
                   </div>
 
-                  <div class="mini-grid">
+                  <div class="mini-grid" style="margin-top: 14px;">
                     <div class="list-card">
                       <div class="list-title">Disagreements</div>
                       <ul id="disagreements" class="clean"></ul>
@@ -693,10 +651,10 @@
                   </div>
                 </div>
 
-                <div class="surface">
+                <div class="transcript-shell">
                   <div class="surface-title">
-                    <h3>Investment Committee Transcript</h3>
-                    <span class="badge">Live-style Debate</span>
+                    <h3>Investment Committee Live</h3>
+                    <span class="badge">Conversational Debate</span>
                   </div>
                   <div id="transcript" class="transcript"></div>
                 </div>
@@ -705,18 +663,17 @@
                   <div class="surface">
                     <div class="surface-title">
                       <h3>Agent Scorecards</h3>
-                      <span class="badge">Detailed Breakdown</span>
+                      <span class="badge">Breakdown</span>
                     </div>
                     <div id="agents-grid" class="agents-grid"></div>
                   </div>
-
                   <div class="surface">
                     <div class="surface-title">
-                      <h3>Debate Round Snapshot</h3>
+                      <h3>Debate Snapshot</h3>
                       <span class="badge">Revised Positions</span>
                     </div>
-                    <div id="debate-list" style="display:grid; gap:12px;"></div>
-                    <div class="mini-grid" style="margin-top:14px;">
+                    <div id="debate-list" style="display: grid; gap: 12px;"></div>
+                    <div class="mini-grid" style="margin-top: 14px;">
                       <div class="list-card">
                         <div class="list-title">Top Strengths</div>
                         <ul id="top-strengths" class="clean"></ul>
@@ -752,41 +709,25 @@
       const serverModeEl = document.getElementById('server-mode');
       const resultEmpty = document.getElementById('result-empty');
       const resultWrap = document.getElementById('result-wrap');
+      const transcriptEl = document.getElementById('transcript');
 
-      const loginStorageKey = 'startup-jury-demo-user';
+      const storageKey = 'startup-jury-demo-user';
 
-      const demoProfile = {
-        name: 'Shanks',
-        role: 'Founder',
-        team: 'Yonko Labs'
-      };
+      const demoProfile = { name: 'Shanks', role: 'Founder', team: 'Yonko Labs' };
 
-      const demoData = {
+      const demoIdea = {
         title: 'Startup Jury',
-        summary: '예비 창업자가 아이디어를 입력하면 VC, 시장, 기술, 성장, 리스크 에이전트가 평가하고 토론한 뒤 moderator가 최종 사업성 판단을 제공하는 서비스',
-        targetCustomer: '예비 창업자와 초기 스타트업 팀',
-        customerSegment: '해커톤 참가자, 대학생 창업팀, 1인 창업 준비생',
-        problem: '창업 아이디어 검증이 느리고 주관적이며, 다양한 전문가 관점을 한 번에 얻기 어렵다',
-        solution: '다중 역할 AI 에이전트가 사업성, 시장성, 구현 가능성, 성장성, 리스크를 평가하고 debate 후 moderator가 결론을 정리한다',
-        uniqueValue: '단순 요약이 아니라 역할별 토론과 moderator 종합 판단까지 제공한다',
-        revenueModel: 'B2B SaaS 구독 + 프리미엄 리포트',
-        pricingHint: '월 29달러 팀 플랜',
-        acquisitionChannel: '창업 커뮤니티, 대학 창업센터, 해커톤 파트너십',
-        marketRegion: 'Korea',
-        whyNow: '생성형 AI 사용이 대중화되면서 빠른 아이디어 검증 자동화 수요가 증가했다',
-        teamStrength: 'LLM 앱 개발 경험과 빠른 프로토타이핑 경험이 있다',
-        mvpScope: '아이디어 입력, 역할별 평가, debate, moderator 결과 리포트',
-        competitors: 'ChatGPT, CB Insights, PitchBook',
-        stage: 'idea'
+        pitch: '예비 창업자가 자기 아이디어를 한 단락으로 적어 올리면 VC, Market, Tech, Growth, Risk 다섯 AI 에이전트가 실시간으로 토론하면서 사업성을 평가해주는 서비스. 단순 점수가 아니라 서로 반박하고 보완하는 대화 흐름을 보여주고, Moderator가 최종 판정과 다음 액션을 정리해준다.',
+        notes: '주 타깃은 해커톤 참가자와 1인 창업자. 월 구독 모델 가정. 첫 채널은 창업 커뮤니티와 대학 창업센터.'
       };
 
       const speakerMeta = {
-        vc: { label: 'VC Agent', avatar: 'VC' },
-        market: { label: 'Market Agent', avatar: 'MK' },
-        tech: { label: 'Tech Agent', avatar: 'TE' },
-        growth: { label: 'Growth Agent', avatar: 'GR' },
-        risk: { label: 'Risk Agent', avatar: 'RS' },
-        moderator: { label: 'Moderator', avatar: 'MO' }
+        vc: { label: 'VC Agent', avatar: 'VC', side: 'left' },
+        market: { label: 'Market Agent', avatar: 'MK', side: 'right' },
+        tech: { label: 'Tech Agent', avatar: 'TE', side: 'left' },
+        growth: { label: 'Growth Agent', avatar: 'GR', side: 'right' },
+        risk: { label: 'Risk Agent', avatar: 'RS', side: 'left' },
+        moderator: { label: 'Moderator', avatar: 'MO', side: 'right' },
       };
 
       function showDashboard(profile) {
@@ -801,22 +742,11 @@
         loginScreen.classList.remove('hidden');
       }
 
-      function saveProfile(profile) {
-        localStorage.setItem(loginStorageKey, JSON.stringify(profile));
-      }
-
+      function saveProfile(profile) { localStorage.setItem(storageKey, JSON.stringify(profile)); }
       function loadProfile() {
-        try {
-          const raw = localStorage.getItem(loginStorageKey);
-          return raw ? JSON.parse(raw) : null;
-        } catch {
-          return null;
-        }
+        try { return JSON.parse(localStorage.getItem(storageKey)); } catch { return null; }
       }
-
-      function clearProfile() {
-        localStorage.removeItem(loginStorageKey);
-      }
+      function clearProfile() { localStorage.removeItem(storageKey); }
 
       function fillDemoProfile() {
         loginName.value = demoProfile.name;
@@ -824,8 +754,13 @@
         loginTeam.value = demoProfile.team;
       }
 
-      demoLoginBtn.addEventListener('click', fillDemoProfile);
+      function fillDemoIdea() {
+        form.elements.title.value = demoIdea.title;
+        form.elements.pitch.value = demoIdea.pitch;
+        form.elements.notes.value = demoIdea.notes;
+      }
 
+      demoLoginBtn.addEventListener('click', fillDemoProfile);
       enterBtn.addEventListener('click', () => {
         const profile = {
           name: loginName.value.trim() || demoProfile.name,
@@ -835,18 +770,8 @@
         saveProfile(profile);
         showDashboard(profile);
       });
-
-      logoutBtn.addEventListener('click', () => {
-        clearProfile();
-        showLogin();
-      });
-
-      fillDemoBtn.addEventListener('click', () => {
-        Object.entries(demoData).forEach(([key, value]) => {
-          const field = form.elements.namedItem(key);
-          if (field) field.value = value;
-        });
-      });
+      logoutBtn.addEventListener('click', () => { clearProfile(); showLogin(); });
+      fillDemoBtn.addEventListener('click', fillDemoIdea);
 
       async function fetchHealth() {
         try {
@@ -862,31 +787,24 @@
         if (!items || items.length === 0) return '<li>없음</li>';
         return items.map((item) => `<li>${item}</li>`).join('');
       }
-
-      function verdictPillClass(verdict) {
-        return verdict === 'invest' ? 'invest' : verdict === 'watch' ? 'watch' : 'pass';
+      function verdictPillClass(v) {
+        return v === 'invest' ? 'invest' : v === 'watch' ? 'watch' : 'pass';
       }
 
       function renderAgents(evaluations) {
         const grid = document.getElementById('agents-grid');
-        const breakdownLabels = {
-          problemClarity: '문제정의',
-          marketAttractiveness: '시장성',
-          feasibility: '실현가능성',
-          businessModelStrength: '수익모델',
-          growthPotential: '성장성',
-          riskReadiness: '리스크 대응'
+        const labels = {
+          problemClarity: '문제정의', marketAttractiveness: '시장성', feasibility: '실현가능성',
+          businessModelStrength: '수익모델', growthPotential: '성장성', riskReadiness: '리스크 대응',
         };
-
         grid.innerHTML = evaluations.map((agent) => {
           const bars = Object.entries(agent.scoreBreakdown || {}).map(([key, value]) => `
             <div class="bar-row">
-              <div>${breakdownLabels[key] || key}</div>
+              <div>${labels[key] || key}</div>
               <div class="bar"><span style="width:${value}%"></span></div>
               <div>${value}</div>
             </div>
           `).join('');
-
           return `
             <div class="agent-card">
               <div class="agent-head">
@@ -898,7 +816,7 @@
               </div>
               <div class="chips">${(agent.strengths || []).map((s) => `<span class="chip">${s}</span>`).join('')}</div>
               <div class="bars">${bars}</div>
-              <div class="mini-grid" style="margin-top:14px;">
+              <div class="mini-grid" style="margin-top: 14px;">
                 <div class="list-card">
                   <div class="list-title">Concerns</div>
                   <ul class="clean">${liItems(agent.concerns)}</ul>
@@ -918,32 +836,80 @@
         container.innerHTML = debate.map((item) => `
           <div class="debate-card">
             <div class="debate-title">${speakerMeta[item.role]?.label || item.role} · ${item.stance.toUpperCase()}</div>
-            <div class="debate-meta">동의한 패널: ${(item.agreesWith || []).join(', ') || '없음'} · 수정 점수: ${item.revisedScore}</div>
+            <div class="debate-meta">동의: ${(item.agreesWith || []).map(r => speakerMeta[r]?.label || r).join(', ') || '없음'} · 수정 점수: ${item.revisedScore}</div>
             <ul class="clean">${liItems(item.rebuttals)}</ul>
-            <div style="margin-top:10px; color: var(--text); line-height:1.7; font-weight:600;">${item.closingNote}</div>
+            <div style="margin-top: 10px; color: var(--text); font-weight: 600; line-height: 1.7;">${item.closingNote}</div>
           </div>
         `).join('');
       }
 
-      async function renderTranscript(transcript) {
-        const container = document.getElementById('transcript');
-        container.innerHTML = '';
-        for (const message of transcript || []) {
-          const meta = speakerMeta[message.speaker] || { label: message.speaker, avatar: '??' };
-          const node = document.createElement('div');
-          node.className = 'chat-bubble';
-          node.innerHTML = `
-            <div class="avatar ${message.speaker}">${meta.avatar}</div>
-            <div class="bubble-card">
-              <div class="bubble-top">
-                <span class="bubble-name">${meta.label}</span>
-                <span class="phase-tag">${message.phase}</span>
-              </div>
-              <div class="bubble-text">${message.text}</div>
+      function buildBubble(message) {
+        const meta = speakerMeta[message.speaker] || { label: message.speaker, avatar: '??', side: 'left' };
+        const side = meta.side === 'right' ? 'right' : 'left';
+        const replyTag = message.addressedTo && speakerMeta[message.addressedTo]
+          ? `<span class="reply-tag">→ ${speakerMeta[message.addressedTo].label}</span>`
+          : '';
+        const avatar = `<div class="avatar ${message.speaker}">${meta.avatar}</div>`;
+        const bubble = `
+          <div class="bubble">
+            <div class="bubble-top">
+              <span class="bubble-name">${meta.label}</span>
+              <span class="phase-tag">${message.phase}</span>
+              ${replyTag}
             </div>
-          `;
-          container.appendChild(node);
-          await new Promise((resolve) => setTimeout(resolve, 120));
+            <div class="bubble-text"></div>
+          </div>
+        `;
+        const wrapper = document.createElement('div');
+        wrapper.className = `chat-row ${side}`;
+        wrapper.innerHTML = side === 'left' ? avatar + bubble : bubble + avatar;
+        return wrapper;
+      }
+
+      function sleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
+
+      async function typeInto(target, text) {
+        let typed = '';
+        const interval = Math.max(8, Math.min(22, Math.round(220 / Math.max(text.length, 30))));
+        for (let i = 0; i < text.length; i++) {
+          typed += text[i];
+          target.textContent = typed;
+          target.parentElement.parentElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          if (i % 4 === 0) await sleep(interval);
+        }
+      }
+
+      function showTypingPlaceholder(message) {
+        const meta = speakerMeta[message.speaker] || { label: message.speaker, avatar: '??', side: 'left' };
+        const side = meta.side === 'right' ? 'right' : 'left';
+        const placeholder = document.createElement('div');
+        placeholder.className = `chat-row ${side}`;
+        const avatar = `<div class="avatar ${message.speaker}">${meta.avatar}</div>`;
+        const bubble = `
+          <div class="bubble">
+            <div class="bubble-top">
+              <span class="bubble-name">${meta.label}</span>
+              <span class="phase-tag">${message.phase}</span>
+            </div>
+            <div class="bubble-text"><span class="typing"><span></span><span></span><span></span></span></div>
+          </div>
+        `;
+        placeholder.innerHTML = side === 'left' ? avatar + bubble : bubble + avatar;
+        transcriptEl.appendChild(placeholder);
+        placeholder.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        return placeholder;
+      }
+
+      async function renderTranscript(transcript) {
+        transcriptEl.innerHTML = '';
+        for (const message of transcript || []) {
+          const placeholder = showTypingPlaceholder(message);
+          await sleep(420);
+          const finalNode = buildBubble(message);
+          placeholder.replaceWith(finalNode);
+          const textEl = finalNode.querySelector('.bubble-text');
+          await typeInto(textEl, message.text);
+          await sleep(120);
         }
       }
 
@@ -974,12 +940,7 @@
         errorBox.classList.add('hidden');
         const formData = new FormData(form);
         const payload = Object.fromEntries(formData.entries());
-
-        if (payload.competitors) {
-          payload.competitors = String(payload.competitors).split(',').map(v => v.trim()).filter(Boolean);
-        } else {
-          delete payload.competitors;
-        }
+        if (!payload.notes) delete payload.notes;
 
         const submitBtn = form.querySelector('button[type="submit"]');
         const originalText = submitBtn.textContent;
@@ -988,24 +949,20 @@
 
         resultEmpty.classList.add('hidden');
         resultWrap.classList.remove('hidden');
-        document.getElementById('transcript').innerHTML = '<div class="muted">에이전트들이 입장하고 토론을 준비 중입니다...</div>';
+        transcriptEl.innerHTML = '<div style="color: var(--muted);">에이전트들이 입장하고 토론을 준비 중입니다...</div>';
 
         try {
           const res = await fetch('/evaluate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(payload),
           });
           const data = await res.json();
-          if (!res.ok) {
-            throw new Error(data?.error || '요청 실패');
-          }
+          if (!res.ok) throw new Error(data?.error || '요청 실패');
           await renderResult(data);
         } catch (err) {
           errorBox.classList.remove('hidden');
           errorBox.textContent = err.message || '알 수 없는 오류가 발생했습니다.';
-          resultWrap.classList.add('hidden');
-          resultEmpty.classList.remove('hidden');
         } finally {
           submitBtn.disabled = false;
           submitBtn.textContent = originalText;
@@ -1013,13 +970,11 @@
       });
 
       fetchHealth();
-      fillDemoBtn.click();
+      fillDemoIdea();
       fillDemoProfile();
 
-      const storedProfile = loadProfile();
-      if (storedProfile) {
-        showDashboard(storedProfile);
-      }
+      const stored = loadProfile();
+      if (stored) showDashboard(stored);
     </script>
   </body>
 </html>
