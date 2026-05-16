@@ -178,6 +178,98 @@
         border: 1px dashed rgba(255,255,255,0.16);
       }
 
+      .stepper {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .step {
+        display: grid;
+        gap: 6px;
+        padding: 12px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 16px;
+        opacity: .55;
+        transition: opacity .25s ease, transform .25s ease, border-color .25s ease, background .25s ease;
+      }
+      .step.active {
+        opacity: 1;
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, rgba(124,156,255,0.22), rgba(192,132,252,0.18));
+        border-color: rgba(124,156,255,0.45);
+        box-shadow: 0 14px 28px rgba(124,156,255,0.18);
+      }
+      .step.done {
+        opacity: .85;
+        background: rgba(74,222,128,0.07);
+        border-color: rgba(74,222,128,0.2);
+      }
+      .step-index {
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        color: var(--muted-2);
+      }
+      .step-title {
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .panel-strip {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+      .panel-mini {
+        border-radius: 18px;
+        padding: 12px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.08);
+        display: grid;
+        gap: 6px;
+      }
+      .panel-mini-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+      }
+      .panel-mini-role { font-size: 11px; font-weight: 900; letter-spacing: 0.08em; color: var(--muted-2); text-transform: uppercase; }
+      .panel-mini-score { font-size: 18px; font-weight: 900; letter-spacing: -0.04em; }
+      .stance-tag {
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: 0.06em;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.08);
+        color: var(--muted);
+      }
+      .stance-tag.bullish { background: rgba(74,222,128,0.16); color: #4ade80; }
+      .stance-tag.neutral { background: rgba(124,156,255,0.18); color: #c7d2fe; }
+      .stance-tag.bearish { background: rgba(248,113,113,0.16); color: #f87171; }
+
+      .export-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+      }
+      .export-btn {
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.12);
+        color: var(--text);
+        font-weight: 700;
+        font-size: 13px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        cursor: pointer;
+      }
+      .export-btn:hover { transform: translateY(-1px); border-color: rgba(124,156,255,0.4); }
+
       .scenario-list {
         display: grid;
         gap: 10px;
@@ -647,6 +739,19 @@
 
               <div id="result-wrap" class="hidden" style="display: grid; gap: 20px;">
                 <div class="surface">
+                  <div class="surface-title">
+                    <h3>패널 진행 단계</h3>
+                    <span class="badge">Live Stepper</span>
+                  </div>
+                  <div id="stepper" class="stepper"></div>
+                  <div id="panel-strip" class="panel-strip"></div>
+                  <div class="export-row">
+                    <button id="export-json" class="export-btn">결과 JSON 다운로드</button>
+                    <button id="export-md" class="export-btn">Markdown 리포트 복사</button>
+                  </div>
+                </div>
+
+                <div class="surface">
                   <div class="summary-grid">
                     <div class="metric-card">
                       <div class="metric-label">Overall Score</div>
@@ -765,7 +870,7 @@
         notes: '주 타깃은 해커톤 참가자와 1인 창업자. 월 구독 모델 가정. 첫 채널은 창업 커뮤니티와 대학 창업센터.'
       };
 
-      const scenarioPresets = [
+      let scenarioPresets = [
         {
           emoji: '💇‍♀️',
           title: '미용실 + 네일샵 결합 브랜드',
@@ -809,8 +914,8 @@
         if (!container) return;
         container.innerHTML = scenarioPresets.map((scenario, index) => `
           <button type="button" class="scenario-btn" data-index="${index}">
-            <div class="scenario-title"><span class="scenario-emoji">${scenario.emoji}</span> ${scenario.title}</div>
-            <div class="scenario-desc">${scenario.desc}</div>
+            <div class="scenario-title"><span class="scenario-emoji">${scenario.emoji || '🚀'}</span> ${scenario.title}</div>
+            <div class="scenario-desc">${scenario.desc || scenario.description || ''}</div>
           </button>
         `).join('');
         container.querySelectorAll('.scenario-btn').forEach((btn) => {
@@ -826,6 +931,189 @@
             scrollTarget?.scrollIntoView({ behavior: 'smooth', block: 'start' });
           });
         });
+      }
+
+      async function loadScenariosFromServer() {
+        try {
+          const res = await fetch('/scenarios');
+          if (!res.ok) return;
+          const data = await res.json();
+          if (Array.isArray(data?.scenarios) && data.scenarios.length > 0) {
+            scenarioPresets = data.scenarios.map((scenario) => ({
+              emoji: scenario.emoji,
+              title: scenario.title,
+              desc: scenario.description,
+              idea: scenario.idea,
+            }));
+            renderScenarios();
+          }
+        } catch {
+          // keep local fallback presets
+        }
+      }
+
+      const stepDefs = [
+        { id: 'collect', label: 'Brief 정리' },
+        { id: 'individual', label: '에이전트별 1차 평가' },
+        { id: 'debate', label: '에이전트 토론' },
+        { id: 'moderate', label: 'Moderator 종합' },
+        { id: 'verdict', label: '최종 판정 발표' },
+      ];
+
+      function renderStepper(activeIndex = -1) {
+        const container = document.getElementById('stepper');
+        if (!container) return;
+        container.innerHTML = stepDefs.map((step, index) => {
+          const cls = index < activeIndex ? 'done' : index === activeIndex ? 'active' : '';
+          return `
+            <div class="step ${cls}">
+              <div class="step-index">STEP ${String(index + 1).padStart(2, '0')}</div>
+              <div class="step-title">${step.label}</div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function renderPanelStrip(evaluations, debate) {
+        const container = document.getElementById('panel-strip');
+        if (!container) return;
+        const debateMap = Object.fromEntries((debate || []).map((d) => [d.role, d]));
+        const order = ['vc', 'market', 'tech', 'growth', 'risk'];
+        const sorted = order
+          .map((role) => evaluations.find((evaluation) => evaluation.role === role))
+          .filter(Boolean);
+        container.innerHTML = sorted.map((agent) => {
+          const debateTurn = debateMap[agent.role];
+          const stance = debateTurn?.stance || 'neutral';
+          const revised = debateTurn?.revisedScore ?? agent.score;
+          return `
+            <div class="panel-mini">
+              <div class="panel-mini-top">
+                <span class="panel-mini-role">${speakerMeta[agent.role]?.label?.replace(' Agent', '') || agent.role}</span>
+                <span class="stance-tag ${stance}">${stance.toUpperCase()}</span>
+              </div>
+              <div class="panel-mini-score">${revised}</div>
+              <div style="font-size: 11px; color: var(--muted);">초기 ${agent.score} → 수정 ${revised}</div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      let latestEvaluation = null;
+
+      function buildMarkdownReport(data) {
+        const lines = [];
+        const idea = data.input || {};
+        lines.push(`# Startup Jury Report · ${idea.title || ''}`);
+        lines.push('');
+        lines.push(`> ${data.finalAssessment.oneLiner}`);
+        lines.push('');
+        lines.push(`- Overall Score: **${data.finalAssessment.overallScore}**`);
+        lines.push(`- Verdict: **${data.finalAssessment.investmentVerdict.toUpperCase()}**`);
+        lines.push(`- Moderator Confidence: **${data.moderator.confidence}**`);
+        lines.push(`- Mode: ${data.meta.usedLLM ? 'LLM' : 'Fallback'}`);
+        lines.push('');
+        lines.push('## Pitch');
+        lines.push(idea.pitch || '');
+        if (idea.notes) {
+          lines.push('');
+          lines.push(`> Notes: ${idea.notes}`);
+        }
+        lines.push('');
+        lines.push('## Agent Evaluations');
+        (data.evaluations || []).forEach((agent) => {
+          lines.push(`### ${speakerMeta[agent.role]?.label || agent.role} (Score ${agent.score})`);
+          lines.push(agent.summary);
+          if (agent.strengths?.length) {
+            lines.push('**Strengths**');
+            agent.strengths.forEach((s) => lines.push(`- ${s}`));
+          }
+          if (agent.concerns?.length) {
+            lines.push('**Concerns**');
+            agent.concerns.forEach((c) => lines.push(`- ${c}`));
+          }
+          if (agent.recommendations?.length) {
+            lines.push('**Recommendations**');
+            agent.recommendations.forEach((r) => lines.push(`- ${r}`));
+          }
+          lines.push('');
+        });
+        lines.push('## Transcript');
+        (data.transcript || []).forEach((message) => {
+          const speaker = speakerMeta[message.speaker]?.label || message.speaker;
+          lines.push(`- **${speaker}** (${message.phase}): ${message.text}`);
+        });
+        lines.push('');
+        lines.push('## Moderator Summary');
+        lines.push(data.moderator.finalReasoning);
+        if (data.moderator.consensus?.length) {
+          lines.push('**Consensus**');
+          data.moderator.consensus.forEach((c) => lines.push(`- ${c}`));
+        }
+        if (data.moderator.disagreements?.length) {
+          lines.push('**Disagreements**');
+          data.moderator.disagreements.forEach((d) => lines.push(`- ${d}`));
+        }
+        if (data.finalAssessment.nextActions?.length) {
+          lines.push('**Next Actions**');
+          data.finalAssessment.nextActions.forEach((a) => lines.push(`- ${a}`));
+        }
+        return lines.join('\n');
+      }
+
+      function downloadJson(data) {
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const safeTitle = (data?.input?.title || 'startup-jury').replace(/[^a-zA-Z0-9가-힣_-]+/g, '_');
+        link.href = url;
+        link.download = `${safeTitle}-jury-report.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      async function copyMarkdownReport(data) {
+        const text = buildMarkdownReport(data);
+        try {
+          await navigator.clipboard.writeText(text);
+          flashToast('Markdown 리포트가 클립보드에 복사됐다.');
+        } catch {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          ta.remove();
+          flashToast('Markdown 리포트가 클립보드에 복사됐다.');
+        }
+      }
+
+      function flashToast(message) {
+        let toast = document.getElementById('mini-toast');
+        if (!toast) {
+          toast = document.createElement('div');
+          toast.id = 'mini-toast';
+          toast.style.position = 'fixed';
+          toast.style.bottom = '24px';
+          toast.style.right = '24px';
+          toast.style.padding = '12px 16px';
+          toast.style.borderRadius = '14px';
+          toast.style.background = 'rgba(15, 23, 42, 0.92)';
+          toast.style.color = '#f4f7ff';
+          toast.style.fontSize = '13px';
+          toast.style.fontWeight = '700';
+          toast.style.boxShadow = '0 18px 32px rgba(8, 15, 38, 0.5)';
+          toast.style.zIndex = '9999';
+          toast.style.opacity = '0';
+          toast.style.transition = 'opacity .2s ease';
+          document.body.appendChild(toast);
+        }
+        toast.textContent = message;
+        toast.style.opacity = '1';
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(() => { toast.style.opacity = '0'; }, 1800);
       }
 
       const speakerMeta = {
@@ -1019,6 +1307,7 @@
       }
 
       async function renderResult(data) {
+        latestEvaluation = data;
         resultEmpty.classList.add('hidden');
         resultWrap.classList.remove('hidden');
 
@@ -1035,9 +1324,14 @@
         document.getElementById('top-risks').innerHTML = liItems(data.finalAssessment.topRisks);
         document.getElementById('next-actions').innerHTML = liItems(data.finalAssessment.nextActions);
 
+        renderStepper(2);
+        renderPanelStrip(data.evaluations || [], data.debate || []);
         renderAgents(data.evaluations || []);
         renderDebate(data.debate || []);
         await renderTranscript(data.transcript || []);
+        renderStepper(stepDefs.length - 1);
+        await sleep(200);
+        renderStepper(stepDefs.length);
       }
 
       form.addEventListener('submit', async (e) => {
@@ -1054,9 +1348,12 @@
 
         resultEmpty.classList.add('hidden');
         resultWrap.classList.remove('hidden');
+        renderStepper(0);
+        document.getElementById('panel-strip').innerHTML = '';
         transcriptEl.innerHTML = '<div style="color: var(--muted);">에이전트들이 입장하고 토론을 준비 중입니다...</div>';
 
         try {
+          renderStepper(1);
           const res = await fetch('/evaluate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1068,14 +1365,26 @@
         } catch (err) {
           errorBox.classList.remove('hidden');
           errorBox.textContent = err.message || '알 수 없는 오류가 발생했습니다.';
+          renderStepper(-1);
         } finally {
           submitBtn.disabled = false;
           submitBtn.textContent = originalText;
         }
       });
 
+      document.getElementById('export-json').addEventListener('click', () => {
+        if (!latestEvaluation) { flashToast('먼저 평가를 실행해줘.'); return; }
+        downloadJson(latestEvaluation);
+      });
+      document.getElementById('export-md').addEventListener('click', () => {
+        if (!latestEvaluation) { flashToast('먼저 평가를 실행해줘.'); return; }
+        copyMarkdownReport(latestEvaluation);
+      });
+
       fetchHealth();
       renderScenarios();
+      loadScenariosFromServer();
+      renderStepper();
       fillDemoIdea();
       fillDemoProfile();
 
