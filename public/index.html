@@ -6,280 +6,728 @@
     <title>Startup Jury</title>
     <style>
       :root {
-        --bg: #0b1020;
-        --panel: rgba(18, 25, 48, 0.82);
-        --panel-2: rgba(27, 38, 74, 0.72);
-        --line: rgba(255,255,255,0.1);
-        --text: #f4f7ff;
-        --muted: #b1bdd8;
-        --accent: #7c9cff;
-        --accent-2: #54d2ff;
-        --green: #37d39a;
-        --yellow: #ffcb6b;
-        --red: #ff7b88;
+        --bg: #f5f7fb;
+        --bg-2: #eef2ff;
+        --panel: rgba(255, 255, 255, 0.82);
+        --panel-strong: rgba(255, 255, 255, 0.96);
+        --line: rgba(15, 23, 42, 0.08);
+        --line-strong: rgba(15, 23, 42, 0.14);
+        --text: #0f172a;
+        --muted: #5b6475;
+        --muted-2: #8a92a3;
+        --accent: #5b7cff;
+        --accent-2: #7c3aed;
+        --green: #16a34a;
+        --yellow: #d97706;
+        --red: #dc2626;
+        --shadow: 0 24px 60px rgba(48, 68, 120, 0.14);
+        --radius-xl: 28px;
+        --radius-lg: 20px;
+        --radius-md: 16px;
       }
+
       * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
       body {
-        margin: 0;
         font-family: Inter, Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         color: var(--text);
         background:
-          radial-gradient(circle at top left, rgba(84,210,255,0.16), transparent 26%),
-          radial-gradient(circle at top right, rgba(124,156,255,0.14), transparent 28%),
-          linear-gradient(180deg, #0b1020 0%, #0f1833 100%);
+          radial-gradient(circle at top left, rgba(91,124,255,0.16), transparent 28%),
+          radial-gradient(circle at top right, rgba(124,58,237,0.14), transparent 24%),
+          linear-gradient(180deg, #f8faff 0%, #eef3ff 100%);
       }
-      .container {
-        width: min(1200px, calc(100% - 32px));
-        margin: 0 auto;
-        padding: 36px 0 64px;
-      }
-      .hero {
+
+      .hidden { display: none !important; }
+      .app-shell { min-height: 100vh; }
+      .container { width: min(1380px, calc(100% - 32px)); margin: 0 auto; }
+
+      .login-screen {
+        min-height: 100vh;
         display: grid;
-        grid-template-columns: 1.1fr 0.9fr;
-        gap: 20px;
-        align-items: stretch;
-        margin-bottom: 24px;
+        place-items: center;
+        padding: 24px;
       }
-      .hero-card, .panel {
+
+      .login-card {
+        width: min(1120px, 100%);
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 22px;
+        background: rgba(255,255,255,0.42);
+        border: 1px solid rgba(255,255,255,0.6);
+        box-shadow: var(--shadow);
+        border-radius: 32px;
+        backdrop-filter: blur(24px);
+        padding: 22px;
+      }
+
+      .login-hero, .login-panel, .glass, .surface {
         background: var(--panel);
-        border: 1px solid var(--line);
-        border-radius: 24px;
-        backdrop-filter: blur(14px);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+        border: 1px solid rgba(255,255,255,0.8);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(20px);
       }
-      .hero-card { padding: 28px; }
-      .eyebrow {
+
+      .login-hero {
+        border-radius: 28px;
+        padding: 34px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .gradient-orb {
+        position: absolute;
+        inset: auto -80px -110px auto;
+        width: 240px;
+        height: 240px;
+        background: radial-gradient(circle, rgba(124,58,237,0.34), transparent 62%);
+        pointer-events: none;
+      }
+
+      .badge {
         display: inline-flex;
-        padding: 8px 12px;
+        align-items: center;
+        gap: 8px;
         border-radius: 999px;
-        background: rgba(124,156,255,0.16);
-        color: #dfe6ff;
+        padding: 9px 14px;
+        background: rgba(91,124,255,0.12);
+        color: var(--accent);
         font-size: 13px;
-        margin-bottom: 14px;
+        font-weight: 700;
       }
-      h1 { margin: 0 0 10px; font-size: clamp(32px, 5vw, 54px); line-height: 1.03; }
-      .sub { color: var(--muted); font-size: 16px; line-height: 1.65; }
-      .stats {
+
+      h1, h2, h3 { margin: 0; }
+      .login-title {
+        font-size: clamp(36px, 6vw, 62px);
+        line-height: 1.02;
+        margin: 18px 0 14px;
+        letter-spacing: -0.04em;
+      }
+
+      .lead {
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.78;
+        max-width: 720px;
+      }
+
+      .hero-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 12px;
-        margin-top: 22px;
+        margin-top: 28px;
       }
-      .stat {
-        background: var(--panel-2);
-        border: 1px solid var(--line);
-        border-radius: 18px;
-        padding: 14px;
+
+      .hero-stat {
+        border-radius: 20px;
+        padding: 16px;
+        background: rgba(255,255,255,0.6);
+        border: 1px solid rgba(15,23,42,0.06);
       }
-      .stat .v { font-size: 24px; font-weight: 800; margin-bottom: 6px; }
-      .stat .l { font-size: 13px; color: var(--muted); }
-      .hero-side { padding: 24px; display:flex; flex-direction:column; justify-content:center; }
-      .hero-side ul { margin: 16px 0 0; padding-left: 18px; color: var(--muted); line-height: 1.8; }
-      .layout {
-        display: grid;
-        grid-template-columns: 420px 1fr;
-        gap: 20px;
+
+      .hero-stat .v { font-size: 28px; font-weight: 800; }
+      .hero-stat .l { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+      .login-panel {
+        border-radius: 28px;
+        padding: 26px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
       }
-      .panel { padding: 22px; }
-      .panel h2 { margin: 0 0 14px; font-size: 22px; }
-      .fields { display: grid; gap: 12px; }
-      .field { display: grid; gap: 8px; }
-      .field label { font-size: 13px; color: #d8e0f7; font-weight: 600; }
-      input, textarea {
+
+      .panel-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+      .panel-desc { color: var(--muted); line-height: 1.7; margin-bottom: 22px; }
+
+      .field { display: grid; gap: 8px; margin-bottom: 14px; }
+      .field label { font-size: 13px; color: var(--muted); font-weight: 700; }
+      input, textarea, select {
         width: 100%;
-        background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.12);
+        border: 1px solid rgba(15,23,42,0.09);
+        background: rgba(255,255,255,0.9);
         color: var(--text);
-        border-radius: 14px;
-        padding: 12px 14px;
+        border-radius: 16px;
+        padding: 14px 15px;
         font-size: 14px;
         outline: none;
+        transition: .18s ease;
       }
-      textarea { min-height: 92px; resize: vertical; }
-      input:focus, textarea:focus { border-color: var(--accent-2); box-shadow: 0 0 0 4px rgba(84,210,255,0.1); }
-      .grid-2 { display:grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-      .actions { display:flex; gap: 10px; margin-top: 16px; }
+      textarea { min-height: 96px; resize: vertical; }
+      input:focus, textarea:focus, select:focus {
+        border-color: rgba(91,124,255,0.42);
+        box-shadow: 0 0 0 5px rgba(91,124,255,0.12);
+      }
+
+      .mini-note { font-size: 12px; color: var(--muted-2); margin-top: 4px; }
+      .actions { display: flex; gap: 10px; flex-wrap: wrap; }
       button {
         border: 0;
-        border-radius: 14px;
+        border-radius: 16px;
         padding: 14px 18px;
         font-size: 14px;
-        font-weight: 700;
+        font-weight: 800;
         cursor: pointer;
+        transition: transform .12s ease, box-shadow .18s ease, opacity .18s ease;
       }
-      .primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #08111f; }
-      .secondary { background: rgba(255,255,255,0.08); color: var(--text); border: 1px solid var(--line); }
-      .muted { color: var(--muted); font-size: 13px; }
-      .results { display: grid; gap: 18px; }
-      .summary-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-      .card {
-        background: rgba(255,255,255,0.045);
-        border: 1px solid var(--line);
+      button:hover { transform: translateY(-1px); }
+      button:disabled { opacity: .65; cursor: wait; transform: none; }
+      .primary-btn {
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: white;
+        box-shadow: 0 10px 30px rgba(91,124,255,0.24);
+      }
+      .secondary-btn {
+        background: rgba(255,255,255,0.9);
+        color: var(--text);
+        border: 1px solid rgba(15,23,42,0.08);
+      }
+
+      .dashboard {
+        padding: 26px 0 34px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 20px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .brand-badge {
+        width: 52px;
+        height: 52px;
         border-radius: 18px;
-        padding: 16px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: white;
+        font-weight: 900;
+        font-size: 18px;
+        box-shadow: 0 14px 28px rgba(91,124,255,0.2);
       }
-      .card .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
-      .card .value { font-size: 28px; font-weight: 800; margin-top: 8px; }
+
+      .brand-copy h2 { font-size: 26px; letter-spacing: -0.03em; }
+      .brand-copy p { margin: 4px 0 0; color: var(--muted); }
+
+      .status-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 999px;
+        padding: 10px 14px;
+        background: rgba(255,255,255,0.74);
+        border: 1px solid rgba(15,23,42,0.07);
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: 430px 1fr;
+        gap: 20px;
+      }
+
+      .surface {
+        border-radius: var(--radius-xl);
+        padding: 22px;
+      }
+
+      .surface-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+
+      .surface-title h3 {
+        font-size: 22px;
+        letter-spacing: -0.03em;
+      }
+
+      .muted { color: var(--muted); }
+      .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .left-form { position: sticky; top: 20px; align-self: start; }
+      .form-scroll { max-height: calc(100vh - 110px); overflow: auto; padding-right: 4px; }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .metric-card {
+        border-radius: 20px;
+        padding: 18px;
+        background: rgba(255,255,255,0.86);
+        border: 1px solid rgba(15,23,42,0.06);
+      }
+      .metric-label { font-size: 12px; font-weight: 800; color: var(--muted-2); text-transform: uppercase; letter-spacing: .08em; }
+      .metric-value { margin-top: 8px; font-size: 30px; font-weight: 900; letter-spacing: -0.04em; }
+
+      .hero-summary {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 14px;
+        margin-bottom: 18px;
+      }
+
+      .highlight-card, .side-card {
+        border-radius: 24px;
+        padding: 20px;
+        background: rgba(255,255,255,0.9);
+        border: 1px solid rgba(15,23,42,0.06);
+      }
+
+      .highlight-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 14px;
+        margin-bottom: 14px;
+      }
+
+      .big-line {
+        font-size: 24px;
+        line-height: 1.4;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+      }
+
       .pill {
-        display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
       }
-      .pill.invest { background: rgba(55,211,154,0.14); color: #97ffd7; }
-      .pill.watch { background: rgba(255,203,107,0.14); color: #ffe4a7; }
-      .pill.pass { background: rgba(255,123,136,0.14); color: #ffc0c8; }
-      .verdict {
-        display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top: 12px; flex-wrap: wrap;
+      .pill.invest { background: rgba(22,163,74,0.12); color: var(--green); }
+      .pill.watch { background: rgba(217,119,6,0.12); color: var(--yellow); }
+      .pill.pass { background: rgba(220,38,38,0.12); color: var(--red); }
+
+      .mini-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
       }
-      .agents-grid { display:grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
-      .agent-title { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom: 10px; }
-      .score { font-size: 22px; font-weight: 800; }
-      .bars { display:grid; gap: 8px; margin-top: 12px; }
-      .bar-row { display:grid; grid-template-columns: 120px 1fr 42px; gap: 10px; align-items:center; font-size: 12px; color: var(--muted); }
-      .bar { height: 8px; border-radius: 999px; background: rgba(255,255,255,0.08); overflow:hidden; }
-      .bar > span { display:block; height:100%; border-radius:999px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
-      .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top: 10px; }
-      .chip { background: rgba(255,255,255,0.07); border:1px solid var(--line); border-radius: 999px; padding: 7px 10px; font-size: 12px; color: #dbe6ff; }
-      .lists { display:grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
-      ul.clean { margin: 10px 0 0; padding-left: 18px; color: var(--muted); line-height: 1.7; }
-      .debate-list { display:grid; gap: 10px; }
-      .debate-item { border-left: 3px solid rgba(124,156,255,0.45); padding: 12px 14px; background: rgba(255,255,255,0.04); border-radius: 0 16px 16px 0; }
-      .debate-item strong { display:block; margin-bottom: 6px; }
-      .loading, .empty { color: var(--muted); text-align:center; padding: 32px 18px; }
-      .error { background: rgba(255,123,136,0.08); color: #ffc8cf; border: 1px solid rgba(255,123,136,0.2); border-radius: 16px; padding: 12px 14px; margin-bottom: 16px; }
-      @media (max-width: 960px) {
-        .hero, .layout { grid-template-columns: 1fr; }
-        .summary-grid, .agents-grid, .lists { grid-template-columns: 1fr; }
-        .grid-2 { grid-template-columns: 1fr; }
+
+      .list-card {
+        border-radius: 20px;
+        padding: 18px;
+        background: rgba(255,255,255,0.9);
+        border: 1px solid rgba(15,23,42,0.06);
+      }
+
+      .list-title {
+        font-size: 13px;
+        font-weight: 800;
+        color: var(--muted-2);
+        text-transform: uppercase;
+        letter-spacing: .08em;
+      }
+
+      ul.clean {
+        margin: 12px 0 0;
+        padding-left: 18px;
+        color: var(--muted);
+        line-height: 1.8;
+      }
+
+      .transcript {
+        display: grid;
+        gap: 14px;
+      }
+
+      .chat-bubble {
+        display: grid;
+        grid-template-columns: 48px 1fr;
+        gap: 12px;
+        align-items: start;
+      }
+
+      .avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 16px;
+        display: grid;
+        place-items: center;
+        font-size: 13px;
+        font-weight: 900;
+        color: white;
+        box-shadow: 0 10px 24px rgba(31,41,55,0.1);
+      }
+
+      .avatar.vc { background: linear-gradient(135deg, #2563eb, #38bdf8); }
+      .avatar.market { background: linear-gradient(135deg, #7c3aed, #ec4899); }
+      .avatar.tech { background: linear-gradient(135deg, #0f766e, #14b8a6); }
+      .avatar.growth { background: linear-gradient(135deg, #ea580c, #f59e0b); }
+      .avatar.risk { background: linear-gradient(135deg, #dc2626, #fb7185); }
+      .avatar.moderator { background: linear-gradient(135deg, #334155, #64748b); }
+
+      .bubble-card {
+        background: rgba(255,255,255,0.94);
+        border: 1px solid rgba(15,23,42,0.08);
+        border-radius: 22px;
+        padding: 16px 18px;
+      }
+
+      .bubble-top {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 8px;
+      }
+
+      .bubble-name { font-weight: 900; }
+      .phase-tag {
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--muted-2);
+        padding: 6px 8px;
+        border-radius: 999px;
+        background: rgba(15,23,42,0.05);
+      }
+
+      .bubble-text {
+        color: #1e293b;
+        line-height: 1.8;
+        font-size: 15px;
+      }
+
+      .section-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+
+      .agents-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+      }
+
+      .agent-card {
+        border-radius: 22px;
+        padding: 18px;
+        background: rgba(255,255,255,0.92);
+        border: 1px solid rgba(15,23,42,0.07);
+      }
+
+      .agent-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        gap: 10px;
+      }
+
+      .agent-role {
+        font-size: 12px;
+        color: var(--muted-2);
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+      }
+
+      .agent-score {
+        font-size: 28px;
+        font-weight: 900;
+        letter-spacing: -0.04em;
+      }
+
+      .agent-summary {
+        margin-top: 8px;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1.5;
+      }
+
+      .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+      .chip {
+        padding: 7px 10px;
+        border-radius: 999px;
+        background: rgba(91,124,255,0.09);
+        color: #4056a1;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .bars { display: grid; gap: 8px; margin-top: 14px; }
+      .bar-row {
+        display: grid;
+        grid-template-columns: 108px 1fr 42px;
+        gap: 10px;
+        align-items: center;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .bar {
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(15,23,42,0.06);
+        overflow: hidden;
+      }
+      .bar > span {
+        display: block;
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      }
+
+      .debate-card {
+        border-radius: 22px;
+        padding: 18px;
+        background: rgba(255,255,255,0.92);
+        border: 1px solid rgba(15,23,42,0.07);
+      }
+
+      .debate-title { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+      .debate-meta { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
+
+      .error {
+        background: rgba(220,38,38,0.07);
+        color: var(--red);
+        border: 1px solid rgba(220,38,38,0.12);
+        border-radius: 16px;
+        padding: 12px 14px;
+        margin-bottom: 14px;
+        font-size: 14px;
+      }
+
+      .empty-state {
+        display: grid;
+        place-items: center;
+        min-height: 320px;
+        text-align: center;
+        color: var(--muted);
+        border-radius: 24px;
+        background: rgba(255,255,255,0.72);
+        border: 1px dashed rgba(15,23,42,0.12);
+      }
+
+      .login-footer { margin-top: 18px; color: var(--muted-2); font-size: 12px; }
+
+      @media (max-width: 1080px) {
+        .login-card, .dashboard-grid, .hero-summary, .section-grid { grid-template-columns: 1fr; }
+        .summary-grid, .agents-grid, .mini-grid { grid-template-columns: 1fr 1fr; }
+        .left-form { position: static; }
+        .form-scroll { max-height: none; }
+      }
+
+      @media (max-width: 760px) {
+        .summary-grid, .agents-grid, .mini-grid, .grid-2 { grid-template-columns: 1fr; }
+        .topbar { flex-direction: column; align-items: flex-start; }
+        .login-card { padding: 14px; }
+        .login-hero, .login-panel, .surface { padding: 18px; }
+        .chat-bubble { grid-template-columns: 1fr; }
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <section class="hero">
-        <div class="hero-card">
-          <div class="eyebrow">Multi-Agent Startup Evaluation</div>
-          <h1>Startup Jury</h1>
-          <div class="sub">
-            스타트업 아이디어를 입력하면 VC, 시장, 기술, 성장, 리스크 에이전트가 평가하고,
-            debate와 moderator 종합 판단까지 한 번에 보여주는 해커톤용 심사 플랫폼.
+    <div class="app-shell">
+      <section id="login-screen" class="login-screen">
+        <div class="login-card">
+          <div class="login-hero">
+            <div class="gradient-orb"></div>
+            <div class="badge">AI Investment Committee · Demo Access</div>
+            <div class="login-title">Startup Jury</div>
+            <div class="lead">
+              여러 역할의 AI 에이전트가 스타트업 아이디어를 실제 투자심사 패널처럼 검토하고,
+              서로 반박하고, moderator가 결론을 정리하는 멀티에이전트 평가 플랫폼.
+            </div>
+            <div class="hero-grid">
+              <div class="hero-stat"><div class="v">5 Agents</div><div class="l">VC · Market · Tech · Growth · Risk</div></div>
+              <div class="hero-stat"><div class="v">Live Debate</div><div class="l">단답형이 아닌 토론 흐름</div></div>
+              <div class="hero-stat"><div class="v">Moderator</div><div class="l">합의점과 최종 판정 제시</div></div>
+            </div>
           </div>
-          <div class="stats">
-            <div class="stat"><div class="v">5</div><div class="l">전문 역할 에이전트</div></div>
-            <div class="stat"><div class="v">1</div><div class="l">Moderator Agent</div></div>
-            <div class="stat"><div class="v">3-step</div><div class="l">평가 → 토론 → 종합판단</div></div>
+
+          <div class="login-panel">
+            <div class="panel-title">심사 패널 입장</div>
+            <div class="panel-desc">
+              실제 인증은 아니고 데모용 로그인이다. 이름과 역할만 넣고 들어가면 바로 투자심사 대시보드로 이동한다.
+            </div>
+            <div class="field">
+              <label>이름</label>
+              <input id="login-name" placeholder="예: Shanks" />
+            </div>
+            <div class="field">
+              <label>역할</label>
+              <select id="login-role">
+                <option value="Founder">Founder</option>
+                <option value="Judge">Judge</option>
+                <option value="Investor">Investor</option>
+                <option value="Operator">Operator</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>팀 / 조직</label>
+              <input id="login-team" placeholder="예: Yonko Labs" />
+            </div>
+            <div class="actions">
+              <button id="enter-btn" class="primary-btn">대시보드 입장</button>
+              <button id="demo-login-btn" class="secondary-btn">데모 프로필 채우기</button>
+            </div>
+            <div class="login-footer">이 화면은 발표 흐름을 위해 추가된 진입 화면이다.</div>
           </div>
-        </div>
-        <div class="hero-card hero-side">
-          <h2 style="margin:0; font-size:24px;">무엇을 보여주나</h2>
-          <ul>
-            <li>역할별 점수와 세부 breakdown</li>
-            <li>에이전트 간 반박/보완 debate</li>
-            <li>Moderator의 consensus / disagreement</li>
-            <li>투자 판정과 바로 실행할 next actions</li>
-          </ul>
         </div>
       </section>
 
-      <section class="layout">
-        <div class="panel">
-          <h2>아이디어 입력</h2>
-          <div id="error" class="error" style="display:none"></div>
-          <form id="idea-form" class="fields">
-            <div class="field"><label>제목</label><input name="title" required /></div>
-            <div class="field"><label>한 줄 요약</label><textarea name="summary" required></textarea></div>
-            <div class="grid-2">
-              <div class="field"><label>타깃 고객</label><input name="targetCustomer" /></div>
-              <div class="field"><label>고객 세그먼트</label><input name="customerSegment" /></div>
-            </div>
-            <div class="field"><label>문제</label><textarea name="problem"></textarea></div>
-            <div class="field"><label>해결 방법</label><textarea name="solution"></textarea></div>
-            <div class="field"><label>차별점</label><textarea name="uniqueValue"></textarea></div>
-            <div class="grid-2">
-              <div class="field"><label>수익모델</label><input name="revenueModel" /></div>
-              <div class="field"><label>가격 가설</label><input name="pricingHint" /></div>
-            </div>
-            <div class="grid-2">
-              <div class="field"><label>초기 획득 채널</label><input name="acquisitionChannel" /></div>
-              <div class="field"><label>시장 지역</label><input name="marketRegion" value="Korea" /></div>
-            </div>
-            <div class="field"><label>왜 지금인가</label><textarea name="whyNow"></textarea></div>
-            <div class="grid-2">
-              <div class="field"><label>팀 강점</label><textarea name="teamStrength"></textarea></div>
-              <div class="field"><label>MVP 범위</label><textarea name="mvpScope"></textarea></div>
-            </div>
-            <div class="grid-2">
-              <div class="field"><label>경쟁사 (쉼표 구분)</label><input name="competitors" /></div>
-              <div class="field"><label>단계</label><input name="stage" value="idea" /></div>
-            </div>
-            <div class="actions">
-              <button type="submit" class="primary">사업성 평가 시작</button>
-              <button type="button" class="secondary" id="fill-demo">데모 데이터 채우기</button>
-            </div>
-            <div class="muted">현재 서버 모드: <span id="server-mode">확인 중...</span></div>
-          </form>
-        </div>
-
-        <div class="results">
-          <div id="result-empty" class="panel empty">왼쪽에서 아이디어를 입력하고 평가를 시작하면 결과가 여기 표시된다.</div>
-          <div id="result-wrap" style="display:none; gap:18px;">
-            <div class="panel">
-              <div class="summary-grid">
-                <div class="card"><div class="label">Overall Score</div><div class="value" id="overall-score">-</div></div>
-                <div class="card"><div class="label">Verdict</div><div class="value" id="overall-verdict">-</div></div>
-                <div class="card"><div class="label">Moderator Confidence</div><div class="value" id="moderator-confidence">-</div></div>
-                <div class="card"><div class="label">Mode</div><div class="value" id="response-mode">-</div></div>
+      <section id="dashboard" class="dashboard hidden">
+        <div class="container">
+          <div class="topbar">
+            <div class="brand">
+              <div class="brand-badge">SJ</div>
+              <div class="brand-copy">
+                <h2>Startup Jury</h2>
+                <p id="welcome-copy">심사 패널에 입장했습니다.</p>
               </div>
-              <div class="verdict">
+            </div>
+            <div class="status-row">
+              <div class="status-pill">Server Mode · <span id="server-mode">확인 중...</span></div>
+              <div class="status-pill">Session · <span id="session-user">-</span></div>
+              <button id="logout-btn" class="secondary-btn">로그아웃</button>
+            </div>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="surface left-form">
+              <div class="surface-title">
+                <h3>아이디어 입력</h3>
+                <span class="badge">Input Brief</span>
+              </div>
+              <div id="error" class="error hidden"></div>
+              <div class="form-scroll">
+                <form id="idea-form">
+                  <div class="field"><label>제목</label><input name="title" required /></div>
+                  <div class="field"><label>한 줄 요약</label><textarea name="summary" required></textarea></div>
+                  <div class="grid-2">
+                    <div class="field"><label>타깃 고객</label><input name="targetCustomer" /></div>
+                    <div class="field"><label>고객 세그먼트</label><input name="customerSegment" /></div>
+                  </div>
+                  <div class="field"><label>문제</label><textarea name="problem"></textarea></div>
+                  <div class="field"><label>해결 방법</label><textarea name="solution"></textarea></div>
+                  <div class="field"><label>차별점</label><textarea name="uniqueValue"></textarea></div>
+                  <div class="grid-2">
+                    <div class="field"><label>수익모델</label><input name="revenueModel" /></div>
+                    <div class="field"><label>가격 가설</label><input name="pricingHint" /></div>
+                  </div>
+                  <div class="grid-2">
+                    <div class="field"><label>초기 획득 채널</label><input name="acquisitionChannel" /></div>
+                    <div class="field"><label>시장 지역</label><input name="marketRegion" value="Korea" /></div>
+                  </div>
+                  <div class="field"><label>왜 지금인가</label><textarea name="whyNow"></textarea></div>
+                  <div class="grid-2">
+                    <div class="field"><label>팀 강점</label><textarea name="teamStrength"></textarea></div>
+                    <div class="field"><label>MVP 범위</label><textarea name="mvpScope"></textarea></div>
+                  </div>
+                  <div class="grid-2">
+                    <div class="field"><label>경쟁사 (쉼표 구분)</label><input name="competitors" /></div>
+                    <div class="field"><label>단계</label><select name="stage"><option>idea</option><option>prototype</option><option>mvp</option><option>launched</option></select></div>
+                  </div>
+                  <div class="actions" style="margin-top: 14px;">
+                    <button type="submit" class="primary-btn">투자심사 시작</button>
+                    <button type="button" class="secondary-btn" id="fill-demo">데모 입력</button>
+                  </div>
+                  <div class="mini-note">입력값이 풍부할수록 agent 토론과 moderator 판단이 더 자연스러워진다.</div>
+                </form>
+              </div>
+            </div>
+
+            <div style="display:grid; gap:18px; align-content:start;">
+              <div id="result-empty" class="empty-state">
                 <div>
-                  <div class="label">One-liner</div>
-                  <div style="font-size:20px; font-weight:700; margin-top:8px;" id="one-liner">-</div>
-                </div>
-                <div id="verdict-pill"></div>
-              </div>
-            </div>
-
-            <div class="panel">
-              <h2>Moderator Summary</h2>
-              <div class="lists">
-                <div class="card">
-                  <div class="label">Consensus</div>
-                  <ul id="consensus" class="clean"></ul>
-                </div>
-                <div class="card">
-                  <div class="label">Disagreements</div>
-                  <ul id="disagreements" class="clean"></ul>
+                  <h3 style="margin-bottom:10px; font-size:28px;">패널 토론 대기 중</h3>
+                  <div>왼쪽에서 스타트업 아이디어를 입력하면 에이전트들이 실제 회의처럼 대화하기 시작한다.</div>
                 </div>
               </div>
-              <div class="card" style="margin-top:14px;">
-                <div class="label">Final Reasoning</div>
-                <div id="final-reasoning" style="margin-top:10px; color: var(--muted); line-height:1.7;"></div>
-              </div>
-            </div>
 
-            <div class="panel">
-              <h2>Agent Evaluations</h2>
-              <div id="agents-grid" class="agents-grid"></div>
-            </div>
+              <div id="result-wrap" class="hidden" style="display:grid; gap:18px;">
+                <div class="surface">
+                  <div class="summary-grid">
+                    <div class="metric-card"><div class="metric-label">Overall Score</div><div class="metric-value" id="overall-score">-</div></div>
+                    <div class="metric-card"><div class="metric-label">Investment Verdict</div><div class="metric-value" id="overall-verdict">-</div></div>
+                    <div class="metric-card"><div class="metric-label">Moderator Confidence</div><div class="metric-value" id="moderator-confidence">-</div></div>
+                    <div class="metric-card"><div class="metric-label">Response Mode</div><div class="metric-value" id="response-mode">-</div></div>
+                  </div>
 
-            <div class="panel">
-              <h2>Debate Timeline</h2>
-              <div id="debate-list" class="debate-list"></div>
-            </div>
+                  <div class="hero-summary">
+                    <div class="highlight-card">
+                      <div class="highlight-head">
+                        <div>
+                          <div class="metric-label">One-line Verdict</div>
+                          <div id="one-liner" class="big-line">-</div>
+                        </div>
+                        <div id="verdict-pill"></div>
+                      </div>
+                      <div class="muted" id="final-reasoning">-</div>
+                    </div>
+                    <div class="side-card">
+                      <div class="metric-label">Moderator Consensus</div>
+                      <ul id="consensus" class="clean"></ul>
+                    </div>
+                  </div>
 
-            <div class="panel">
-              <h2>Next Actions</h2>
-              <div class="lists">
-                <div class="card">
-                  <div class="label">Top Strengths</div>
-                  <ul id="top-strengths" class="clean"></ul>
+                  <div class="mini-grid">
+                    <div class="list-card">
+                      <div class="list-title">Disagreements</div>
+                      <ul id="disagreements" class="clean"></ul>
+                    </div>
+                    <div class="list-card">
+                      <div class="list-title">Next Actions</div>
+                      <ul id="next-actions" class="clean"></ul>
+                    </div>
+                  </div>
                 </div>
-                <div class="card">
-                  <div class="label">Top Risks</div>
-                  <ul id="top-risks" class="clean"></ul>
+
+                <div class="surface">
+                  <div class="surface-title">
+                    <h3>Investment Committee Transcript</h3>
+                    <span class="badge">Live-style Debate</span>
+                  </div>
+                  <div id="transcript" class="transcript"></div>
                 </div>
-              </div>
-              <div class="card" style="margin-top:14px;">
-                <div class="label">Next Actions</div>
-                <ul id="next-actions" class="clean"></ul>
+
+                <div class="section-grid">
+                  <div class="surface">
+                    <div class="surface-title">
+                      <h3>Agent Scorecards</h3>
+                      <span class="badge">Detailed Breakdown</span>
+                    </div>
+                    <div id="agents-grid" class="agents-grid"></div>
+                  </div>
+
+                  <div class="surface">
+                    <div class="surface-title">
+                      <h3>Debate Round Snapshot</h3>
+                      <span class="badge">Revised Positions</span>
+                    </div>
+                    <div id="debate-list" style="display:grid; gap:12px;"></div>
+                    <div class="mini-grid" style="margin-top:14px;">
+                      <div class="list-card">
+                        <div class="list-title">Top Strengths</div>
+                        <ul id="top-strengths" class="clean"></ul>
+                      </div>
+                      <div class="list-card">
+                        <div class="list-title">Top Risks</div>
+                        <ul id="top-risks" class="clean"></ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -288,12 +736,30 @@
     </div>
 
     <script>
+      const loginScreen = document.getElementById('login-screen');
+      const dashboard = document.getElementById('dashboard');
+      const enterBtn = document.getElementById('enter-btn');
+      const demoLoginBtn = document.getElementById('demo-login-btn');
+      const logoutBtn = document.getElementById('logout-btn');
+      const loginName = document.getElementById('login-name');
+      const loginRole = document.getElementById('login-role');
+      const loginTeam = document.getElementById('login-team');
+      const sessionUser = document.getElementById('session-user');
+      const welcomeCopy = document.getElementById('welcome-copy');
       const form = document.getElementById('idea-form');
       const fillDemoBtn = document.getElementById('fill-demo');
       const errorBox = document.getElementById('error');
       const serverModeEl = document.getElementById('server-mode');
       const resultEmpty = document.getElementById('result-empty');
       const resultWrap = document.getElementById('result-wrap');
+
+      const loginStorageKey = 'startup-jury-demo-user';
+
+      const demoProfile = {
+        name: 'Shanks',
+        role: 'Founder',
+        team: 'Yonko Labs'
+      };
 
       const demoData = {
         title: 'Startup Jury',
@@ -313,6 +779,67 @@
         competitors: 'ChatGPT, CB Insights, PitchBook',
         stage: 'idea'
       };
+
+      const speakerMeta = {
+        vc: { label: 'VC Agent', avatar: 'VC' },
+        market: { label: 'Market Agent', avatar: 'MK' },
+        tech: { label: 'Tech Agent', avatar: 'TE' },
+        growth: { label: 'Growth Agent', avatar: 'GR' },
+        risk: { label: 'Risk Agent', avatar: 'RS' },
+        moderator: { label: 'Moderator', avatar: 'MO' }
+      };
+
+      function showDashboard(profile) {
+        loginScreen.classList.add('hidden');
+        dashboard.classList.remove('hidden');
+        sessionUser.textContent = `${profile.name} · ${profile.role}`;
+        welcomeCopy.textContent = `${profile.team || 'Independent'} 소속 ${profile.role} ${profile.name}님, 투자심사 패널에 입장했습니다.`;
+      }
+
+      function showLogin() {
+        dashboard.classList.add('hidden');
+        loginScreen.classList.remove('hidden');
+      }
+
+      function saveProfile(profile) {
+        localStorage.setItem(loginStorageKey, JSON.stringify(profile));
+      }
+
+      function loadProfile() {
+        try {
+          const raw = localStorage.getItem(loginStorageKey);
+          return raw ? JSON.parse(raw) : null;
+        } catch {
+          return null;
+        }
+      }
+
+      function clearProfile() {
+        localStorage.removeItem(loginStorageKey);
+      }
+
+      function fillDemoProfile() {
+        loginName.value = demoProfile.name;
+        loginRole.value = demoProfile.role;
+        loginTeam.value = demoProfile.team;
+      }
+
+      demoLoginBtn.addEventListener('click', fillDemoProfile);
+
+      enterBtn.addEventListener('click', () => {
+        const profile = {
+          name: loginName.value.trim() || demoProfile.name,
+          role: loginRole.value || demoProfile.role,
+          team: loginTeam.value.trim() || demoProfile.team,
+        };
+        saveProfile(profile);
+        showDashboard(profile);
+      });
+
+      logoutBtn.addEventListener('click', () => {
+        clearProfile();
+        showLogin();
+      });
 
       fillDemoBtn.addEventListener('click', () => {
         Object.entries(demoData).forEach(([key, value]) => {
@@ -350,6 +877,7 @@
           growthPotential: '성장성',
           riskReadiness: '리스크 대응'
         };
+
         grid.innerHTML = evaluations.map((agent) => {
           const bars = Object.entries(agent.scoreBreakdown || {}).map(([key, value]) => `
             <div class="bar-row">
@@ -360,23 +888,23 @@
           `).join('');
 
           return `
-            <div class="card">
-              <div class="agent-title">
+            <div class="agent-card">
+              <div class="agent-head">
                 <div>
-                  <div class="label">${agent.role.toUpperCase()} Agent</div>
-                  <div style="font-size:18px; font-weight:800; margin-top:4px;">${agent.summary}</div>
+                  <div class="agent-role">${speakerMeta[agent.role]?.label || agent.role}</div>
+                  <div class="agent-summary">${agent.summary}</div>
                 </div>
-                <div class="score">${agent.score}</div>
+                <div class="agent-score">${agent.score}</div>
               </div>
-              <div class="chips">${agent.strengths.map((s) => `<span class="chip">${s}</span>`).join('')}</div>
+              <div class="chips">${(agent.strengths || []).map((s) => `<span class="chip">${s}</span>`).join('')}</div>
               <div class="bars">${bars}</div>
-              <div class="lists" style="margin-top:14px;">
-                <div>
-                  <div class="label">Concerns</div>
+              <div class="mini-grid" style="margin-top:14px;">
+                <div class="list-card">
+                  <div class="list-title">Concerns</div>
                   <ul class="clean">${liItems(agent.concerns)}</ul>
                 </div>
-                <div>
-                  <div class="label">Recommendations</div>
+                <div class="list-card">
+                  <div class="list-title">Recommendations</div>
                   <ul class="clean">${liItems(agent.recommendations)}</ul>
                 </div>
               </div>
@@ -388,18 +916,40 @@
       function renderDebate(debate) {
         const container = document.getElementById('debate-list');
         container.innerHTML = debate.map((item) => `
-          <div class="debate-item">
-            <strong>${item.role.toUpperCase()} · ${item.stance} · revised ${item.revisedScore}</strong>
-            <div style="color:var(--muted); margin-bottom:8px;">동의: ${(item.agreesWith || []).join(', ') || '없음'}</div>
+          <div class="debate-card">
+            <div class="debate-title">${speakerMeta[item.role]?.label || item.role} · ${item.stance.toUpperCase()}</div>
+            <div class="debate-meta">동의한 패널: ${(item.agreesWith || []).join(', ') || '없음'} · 수정 점수: ${item.revisedScore}</div>
             <ul class="clean">${liItems(item.rebuttals)}</ul>
-            <div style="margin-top:8px; color:#dce6ff;">${item.closingNote}</div>
+            <div style="margin-top:10px; color: var(--text); line-height:1.7; font-weight:600;">${item.closingNote}</div>
           </div>
         `).join('');
       }
 
-      function renderResult(data) {
-        resultEmpty.style.display = 'none';
-        resultWrap.style.display = 'grid';
+      async function renderTranscript(transcript) {
+        const container = document.getElementById('transcript');
+        container.innerHTML = '';
+        for (const message of transcript || []) {
+          const meta = speakerMeta[message.speaker] || { label: message.speaker, avatar: '??' };
+          const node = document.createElement('div');
+          node.className = 'chat-bubble';
+          node.innerHTML = `
+            <div class="avatar ${message.speaker}">${meta.avatar}</div>
+            <div class="bubble-card">
+              <div class="bubble-top">
+                <span class="bubble-name">${meta.label}</span>
+                <span class="phase-tag">${message.phase}</span>
+              </div>
+              <div class="bubble-text">${message.text}</div>
+            </div>
+          `;
+          container.appendChild(node);
+          await new Promise((resolve) => setTimeout(resolve, 120));
+        }
+      }
+
+      async function renderResult(data) {
+        resultEmpty.classList.add('hidden');
+        resultWrap.classList.remove('hidden');
 
         document.getElementById('overall-score').textContent = data.finalAssessment.overallScore;
         document.getElementById('overall-verdict').textContent = data.finalAssessment.investmentVerdict.toUpperCase();
@@ -407,7 +957,6 @@
         document.getElementById('response-mode').textContent = data.meta.usedLLM ? 'LLM' : 'Fallback';
         document.getElementById('one-liner').textContent = data.finalAssessment.oneLiner;
         document.getElementById('verdict-pill').innerHTML = `<span class="pill ${verdictPillClass(data.finalAssessment.investmentVerdict)}">${data.finalAssessment.investmentVerdict.toUpperCase()}</span>`;
-
         document.getElementById('consensus').innerHTML = liItems(data.moderator.consensus);
         document.getElementById('disagreements').innerHTML = liItems(data.moderator.disagreements);
         document.getElementById('final-reasoning').textContent = data.moderator.finalReasoning;
@@ -417,13 +966,15 @@
 
         renderAgents(data.evaluations || []);
         renderDebate(data.debate || []);
+        await renderTranscript(data.transcript || []);
       }
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        errorBox.style.display = 'none';
+        errorBox.classList.add('hidden');
         const formData = new FormData(form);
         const payload = Object.fromEntries(formData.entries());
+
         if (payload.competitors) {
           payload.competitors = String(payload.competitors).split(',').map(v => v.trim()).filter(Boolean);
         } else {
@@ -433,7 +984,11 @@
         const submitBtn = form.querySelector('button[type="submit"]');
         const originalText = submitBtn.textContent;
         submitBtn.disabled = true;
-        submitBtn.textContent = '평가 중...';
+        submitBtn.textContent = '패널 소집 중...';
+
+        resultEmpty.classList.add('hidden');
+        resultWrap.classList.remove('hidden');
+        document.getElementById('transcript').innerHTML = '<div class="muted">에이전트들이 입장하고 토론을 준비 중입니다...</div>';
 
         try {
           const res = await fetch('/evaluate', {
@@ -445,10 +1000,12 @@
           if (!res.ok) {
             throw new Error(data?.error || '요청 실패');
           }
-          renderResult(data);
+          await renderResult(data);
         } catch (err) {
-          errorBox.style.display = 'block';
+          errorBox.classList.remove('hidden');
           errorBox.textContent = err.message || '알 수 없는 오류가 발생했습니다.';
+          resultWrap.classList.add('hidden');
+          resultEmpty.classList.remove('hidden');
         } finally {
           submitBtn.disabled = false;
           submitBtn.textContent = originalText;
@@ -457,6 +1014,12 @@
 
       fetchHealth();
       fillDemoBtn.click();
+      fillDemoProfile();
+
+      const storedProfile = loadProfile();
+      if (storedProfile) {
+        showDashboard(storedProfile);
+      }
     </script>
   </body>
 </html>
