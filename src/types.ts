@@ -12,6 +12,15 @@ export interface StartupIdeaInput {
   stage?: 'idea' | 'prototype' | 'mvp' | 'launched';
 }
 
+export interface ScoreBreakdown {
+  problemClarity: number;
+  marketAttractiveness: number;
+  feasibility: number;
+  businessModelStrength: number;
+  growthPotential: number;
+  riskReadiness: number;
+}
+
 export interface AgentEvaluation {
   role: AgentRole;
   score: number;
@@ -20,6 +29,23 @@ export interface AgentEvaluation {
   strengths: string[];
   concerns: string[];
   recommendations: string[];
+  scoreBreakdown: ScoreBreakdown;
+}
+
+export interface AgentDebateTurn {
+  role: AgentRole;
+  stance: 'bullish' | 'neutral' | 'bearish';
+  agreesWith: AgentRole[];
+  rebuttals: string[];
+  revisedScore: number;
+  closingNote: string;
+}
+
+export interface ModeratorSummary {
+  consensus: string[];
+  disagreements: string[];
+  finalReasoning: string;
+  confidence: number;
 }
 
 export interface FinalAssessment {
@@ -34,9 +60,12 @@ export interface FinalAssessment {
 export interface EvaluationResponse {
   input: StartupIdeaInput;
   evaluations: AgentEvaluation[];
+  debate: AgentDebateTurn[];
+  moderator: ModeratorSummary;
   finalAssessment: FinalAssessment;
   meta: {
     usedLLM: boolean;
     generatedAt: string;
+    llmError?: string;
   };
 }
