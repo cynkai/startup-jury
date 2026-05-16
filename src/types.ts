@@ -1,4 +1,5 @@
 export type AgentRole = 'vc' | 'market' | 'tech' | 'growth' | 'risk';
+export type TranscriptSpeaker = AgentRole | 'moderator';
 
 export interface StartupIdeaInput {
   title: string;
@@ -48,6 +49,13 @@ export interface AgentDebateTurn {
   closingNote: string;
 }
 
+export interface DebateTranscriptMessage {
+  id: string;
+  speaker: TranscriptSpeaker;
+  phase: 'opening' | 'challenge' | 'response' | 'moderation' | 'verdict';
+  text: string;
+}
+
 export interface ModeratorSummary {
   consensus: string[];
   disagreements: string[];
@@ -68,6 +76,7 @@ export interface EvaluationResponse {
   input: StartupIdeaInput;
   evaluations: AgentEvaluation[];
   debate: AgentDebateTurn[];
+  transcript: DebateTranscriptMessage[];
   moderator: ModeratorSummary;
   finalAssessment: FinalAssessment;
   meta: {

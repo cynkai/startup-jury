@@ -2,6 +2,7 @@ import { AGENT_ROLES } from './agents.js';
 import {
   AgentDebateTurn,
   AgentEvaluation,
+  DebateTranscriptMessage,
   EvaluationResponse,
   FinalAssessment,
   ModeratorSummary,
@@ -146,18 +147,10 @@ function evaluateRole(role: AgentEvaluation['role'], input: StartupIdeaInput): A
 
   let score = average(Object.values(breakdown));
 
-  if (role === 'vc') {
-    score += keywordScore(text, ['platform', 'saas', 'subscription', 'b2b', 'api'], 4);
-  }
-  if (role === 'market') {
-    score += keywordScore(text, ['pain', 'problem', 'waste', 'fraud', 'inefficiency'], 4);
-  }
-  if (role === 'tech') {
-    score -= keywordScore(text, ['hardware', 'robot', 'drone', 'biotech'], 4);
-  }
-  if (role === 'risk') {
-    score -= keywordScore(text, ['medical', 'finance', 'trading', 'legal'], 5);
-  }
+  if (role === 'vc') score += keywordScore(text, ['platform', 'saas', 'subscription', 'b2b', 'api'], 4);
+  if (role === 'market') score += keywordScore(text, ['pain', 'problem', 'waste', 'fraud', 'inefficiency'], 4);
+  if (role === 'tech') score -= keywordScore(text, ['hardware', 'robot', 'drone', 'biotech'], 4);
+  if (role === 'risk') score -= keywordScore(text, ['medical', 'finance', 'trading', 'legal'], 5);
 
   score = clampScore(score);
 
@@ -248,6 +241,67 @@ function buildDebate(evaluations: AgentEvaluation[]): AgentDebateTurn[] {
   });
 }
 
+function buildTranscript(
+  input: StartupIdeaInput,
+  evaluations: AgentEvaluation[],
+  debate: AgentDebateTurn[],
+  moderator: ModeratorSummary,
+  finalAssessment: FinalAssessment,
+): DebateTranscriptMessage[] {
+  const messages: DebateTranscriptMessage[] = [];
+
+  evaluations.forEach((evaluation, index) => {
+    messages.push({
+      id: `opening-${evaluation.role}`,
+      speaker: evaluation.role,
+      phase: 'opening',
+      text: `${input.title}에 대한 제 1차 판단은 ${evaluation.score}점입니다. ${evaluation.summary} 강점은 ${evaluation.strengths.slice(0, 2).join(', ')} 쪽이고, 우려는 ${evaluation.concerns[0] || '아직 시장 근거가 충분치 않다는 점'}입니다.`,
+    });
+
+    const turn = debate.find((item) => item.role === evaluation.role);
+    if (turn?.rebuttals?.length) {
+      messages.push({
+        id: `challenge-${evaluation.role}`,
+        speaker: evaluation.role,
+        phase: 'challenge',
+        text: `다른 패널 의견을 검토해보면 ${turn.rebuttals.join(' ')} 그래서 수정 점수는 ${turn.revisedScore}점으로 보겠습니다.`,
+      });
+    }
+
+    messages.push({
+      id: `response-${evaluation.role}`,
+      speaker: evaluation.role,
+      phase: 'response',
+      text: `${turn?.closingNote || `${evaluation.role} 에이전트는 현재 의견을 유지합니다.`} 다음 액션으로는 ${evaluation.recommendations[0] || '고객 검증'}이 가장 중요합니다.`,
+    });
+
+    if (index === 1) {
+      messages.push({
+        id: 'moderation-mid',
+        speaker: 'moderator',
+        phase: 'moderation',
+        text: `현재까지 패널은 문제 정의와 초기 검증 필요성에는 대체로 동의하고 있습니다. 다만 ${moderator.disagreements[0] || '성장성과 리스크 해석'}에서 온도차가 있습니다.`,
+      });
+    }
+  });
+
+  messages.push({
+    id: 'moderator-final',
+    speaker: 'moderator',
+    phase: 'moderation',
+    text: `${moderator.finalReasoning} 패널 합의사항은 ${moderator.consensus.join(' / ')} 입니다.`,
+  });
+
+  messages.push({
+    id: 'verdict-final',
+    speaker: 'moderator',
+    phase: 'verdict',
+    text: `최종 판정은 ${finalAssessment.investmentVerdict.toUpperCase()}이며, 종합 점수는 ${finalAssessment.overallScore}점입니다. 바로 실행할 일은 ${finalAssessment.nextActions.slice(0, 2).join(' 그리고 ')}입니다.`,
+  });
+
+  return messages;
+}
+
 function buildModerator(input: StartupIdeaInput, evaluations: AgentEvaluation[], debate: AgentDebateTurn[]): ModeratorSummary {
   const consensus = uniqueNonEmpty([
     evaluations.some((item) => item.strengths.includes('문제 정의가 어느 정도 명확함')) ? '아이디어의 문제 정의는 비교적 명확하다.' : undefined,
@@ -299,11 +353,13 @@ export function evaluateWithFallback(input: StartupIdeaInput): EvaluationRespons
   const debate = buildDebate(evaluations);
   const moderator = buildModerator(input, evaluations, debate);
   const finalAssessment = aggregate(input, evaluations, debate);
+  const transcript = buildTranscript(input, evaluations, debate, moderator, finalAssessment);
 
   return {
     input,
     evaluations,
     debate,
+    transcript,
     moderator,
     finalAssessment,
     meta: {

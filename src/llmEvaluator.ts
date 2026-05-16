@@ -3,6 +3,7 @@ import { config } from './config.js';
 import {
   AgentDebateTurn,
   AgentEvaluation,
+  DebateTranscriptMessage,
   EvaluationResponse,
   FinalAssessment,
   ModeratorSummary,
@@ -44,7 +45,7 @@ async function chatJson<T>(system: string, user: string): Promise<T> {
     },
     body: JSON.stringify({
       model: config.openAiModel,
-      temperature: 0.4,
+      temperature: 0.55,
       response_format: { type: 'json_object' },
       messages: [
         { role: 'system', content: system },
@@ -137,6 +138,67 @@ async function moderate(
   };
 }
 
+function buildTranscript(
+  input: StartupIdeaInput,
+  evaluations: AgentEvaluation[],
+  debate: AgentDebateTurn[],
+  moderator: ModeratorSummary,
+  finalAssessment: FinalAssessment,
+): DebateTranscriptMessage[] {
+  const messages: DebateTranscriptMessage[] = [];
+
+  evaluations.forEach((evaluation, index) => {
+    messages.push({
+      id: `opening-${evaluation.role}`,
+      speaker: evaluation.role,
+      phase: 'opening',
+      text: `${input.title}에 대한 제 1차 판단은 ${evaluation.score}점입니다. ${evaluation.summary}`,
+    });
+
+    const turn = debate.find((item) => item.role === evaluation.role);
+    if (turn?.rebuttals?.length) {
+      messages.push({
+        id: `challenge-${evaluation.role}`,
+        speaker: evaluation.role,
+        phase: 'challenge',
+        text: `다른 패널의 시각을 보니 ${turn.rebuttals.join(' ')} 따라서 제 수정 점수는 ${turn.revisedScore}점입니다.`,
+      });
+    }
+
+    messages.push({
+      id: `response-${evaluation.role}`,
+      speaker: evaluation.role,
+      phase: 'response',
+      text: `${turn?.closingNote || `${evaluation.role} agent maintains the current position.`}`,
+    });
+
+    if (index === 1) {
+      messages.push({
+        id: 'moderation-mid',
+        speaker: 'moderator',
+        phase: 'moderation',
+        text: `현재까지 패널은 ${moderator.consensus[0] || '핵심 문제 정의'}에는 공감하고 있지만, ${moderator.disagreements[0] || '성장성과 리스크 해석'}은 의견이 갈립니다.`,
+      });
+    }
+  });
+
+  messages.push({
+    id: 'moderator-final',
+    speaker: 'moderator',
+    phase: 'moderation',
+    text: moderator.finalReasoning,
+  });
+
+  messages.push({
+    id: 'verdict-final',
+    speaker: 'moderator',
+    phase: 'verdict',
+    text: `최종 판정은 ${finalAssessment.investmentVerdict.toUpperCase()}이며, 종합 점수는 ${finalAssessment.overallScore}점입니다.`,
+  });
+
+  return messages;
+}
+
 function buildFinalAssessment(input: StartupIdeaInput, evaluations: AgentEvaluation[], debate: AgentDebateTurn[]): FinalAssessment {
   const overallScore = clampScore(average(debate.map((item) => item.revisedScore)));
   return {
@@ -154,11 +216,13 @@ export async function evaluateWithLLM(input: StartupIdeaInput): Promise<Evaluati
   const debate = await Promise.all(evaluations.map((evaluation) => debateAgent(input, evaluation, evaluations)));
   const moderator = await moderate(input, evaluations, debate);
   const finalAssessment = buildFinalAssessment(input, evaluations, debate);
+  const transcript = buildTranscript(input, evaluations, debate, moderator, finalAssessment);
 
   return {
     input,
     evaluations,
     debate,
+    transcript,
     moderator,
     finalAssessment,
     meta: {
