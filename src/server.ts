@@ -7,6 +7,7 @@ import { config, hasOpenAi } from './config.js';
 import { evaluateWithFallback } from './fallbackEvaluator.js';
 import { evaluateWithLLM } from './llmEvaluator.js';
 import { startupIdeaSchema } from './schema.js';
+import { scenarioPresets } from './scenarios.js';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -32,6 +33,10 @@ app.get('/agents', (_req, res) => {
     ],
     moderator: { role: 'moderator', name: 'Moderator Agent', focus: 'synthesize consensus, disagreements, and final investment reasoning' },
   });
+});
+
+app.get('/scenarios', (_req, res) => {
+  res.json({ scenarios: scenarioPresets });
 });
 
 app.post('/evaluate', async (req, res) => {
