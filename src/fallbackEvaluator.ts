@@ -21,10 +21,17 @@ function textOf(input: StartupIdeaInput): string {
     input.title,
     input.summary,
     input.targetCustomer,
+    input.customerSegment,
     input.problem,
     input.solution,
+    input.uniqueValue,
     input.revenueModel,
+    input.pricingHint,
+    input.acquisitionChannel,
     input.marketRegion,
+    input.whyNow,
+    input.teamStrength,
+    input.mvpScope,
     ...(input.competitors || []),
   ]
     .filter(Boolean)
@@ -40,23 +47,33 @@ function buildBreakdown(role: AgentEvaluation['role'], input: StartupIdeaInput):
   const text = textOf(input);
   const hasRevenue = Boolean(input.revenueModel);
   const hasCompetitors = Boolean(input.competitors?.length);
-  const hasTarget = Boolean(input.targetCustomer);
+  const hasTarget = Boolean(input.targetCustomer || input.customerSegment);
   const hasProblem = Boolean(input.problem);
   const hasSolution = Boolean(input.solution);
+  const hasUniqueValue = Boolean(input.uniqueValue);
+  const hasPricing = Boolean(input.pricingHint);
+  const hasAcquisition = Boolean(input.acquisitionChannel);
+  const hasWhyNow = Boolean(input.whyNow);
+  const hasTeam = Boolean(input.teamStrength);
+  const hasMvp = Boolean(input.mvpScope);
 
-  const problemClarity = clampScore(40 + (hasProblem ? 25 : 0) + (hasTarget ? 15 : 0) + (hasSolution ? 10 : 0));
+  const problemClarity = clampScore(
+    35 + (hasProblem ? 22 : 0) + (hasTarget ? 14 : 0) + (hasSolution ? 10 : 0) + (hasUniqueValue ? 8 : 0),
+  );
   const marketAttractiveness = clampScore(
-    38 + (hasTarget ? 18 : 0) + (hasCompetitors ? 14 : 0) + keywordScore(text, ['sme', 'founder', 'team', 'student', 'b2b'], 10),
+    34 + (hasTarget ? 16 : 0) + (hasCompetitors ? 12 : 0) + (hasWhyNow ? 10 : 0) + keywordScore(text, ['sme', 'founder', 'team', 'student', 'b2b'], 10),
   );
   const feasibility = clampScore(
-    45 + (hasSolution ? 20 : 0) + keywordScore(text, ['ai', 'agent', 'automation', 'dashboard', 'analysis'], 12) - keywordScore(text, ['robot', 'drone', 'hardware', 'biotech'], 10),
+    40 + (hasSolution ? 18 : 0) + (hasMvp ? 14 : 0) + (hasTeam ? 8 : 0) + keywordScore(text, ['ai', 'agent', 'automation', 'dashboard', 'analysis'], 10) - keywordScore(text, ['robot', 'drone', 'hardware', 'biotech'], 10),
   );
-  const businessModelStrength = clampScore(35 + (hasRevenue ? 30 : 0) + keywordScore(text, ['subscription', 'saas', 'api', 'marketplace'], 15));
+  const businessModelStrength = clampScore(
+    30 + (hasRevenue ? 24 : 0) + (hasPricing ? 14 : 0) + keywordScore(text, ['subscription', 'saas', 'api', 'marketplace'], 14),
+  );
   const growthPotential = clampScore(
-    40 + keywordScore(text, ['team', 'workflow', 'daily', 'community', 'referral', 'platform'], 20) + (hasTarget ? 10 : 0),
+    34 + (hasAcquisition ? 16 : 0) + (hasTarget ? 10 : 0) + (hasWhyNow ? 6 : 0) + keywordScore(text, ['team', 'workflow', 'daily', 'community', 'referral', 'platform'], 18),
   );
   const riskReadiness = clampScore(
-    55 + (hasCompetitors ? 8 : -6) - keywordScore(text, ['medical', 'finance', 'trading', 'legal'], 15) - keywordScore(text, ['children', 'biometric', 'surveillance'], 10),
+    50 + (hasCompetitors ? 8 : -6) + (hasTeam ? 6 : 0) + (hasMvp ? 4 : 0) - keywordScore(text, ['medical', 'finance', 'trading', 'legal'], 15) - keywordScore(text, ['children', 'biometric', 'surveillance'], 10),
   );
 
   if (role === 'vc') {
@@ -117,8 +134,14 @@ function evaluateRole(role: AgentEvaluation['role'], input: StartupIdeaInput): A
   const text = textOf(input);
   const hasRevenue = Boolean(input.revenueModel);
   const hasCompetitors = Boolean(input.competitors && input.competitors.length > 0);
-  const hasTarget = Boolean(input.targetCustomer);
+  const hasTarget = Boolean(input.targetCustomer || input.customerSegment);
   const hasProblem = Boolean(input.problem);
+  const hasUniqueValue = Boolean(input.uniqueValue);
+  const hasAcquisition = Boolean(input.acquisitionChannel);
+  const hasWhyNow = Boolean(input.whyNow);
+  const hasTeam = Boolean(input.teamStrength);
+  const hasPricing = Boolean(input.pricingHint);
+  const hasMvp = Boolean(input.mvpScope);
   const breakdown = buildBreakdown(role, input);
 
   let score = average(Object.values(breakdown));
@@ -140,8 +163,14 @@ function evaluateRole(role: AgentEvaluation['role'], input: StartupIdeaInput): A
 
   const strengths = uniqueNonEmpty([
     hasProblem ? '문제 정의가 어느 정도 명확함' : undefined,
-    hasTarget ? '타깃 고객이 구체적임' : undefined,
+    hasTarget ? '타깃 고객 또는 세그먼트가 구체적임' : undefined,
     hasRevenue ? '수익모델이 언급되어 있음' : undefined,
+    hasPricing ? '가격 가설이 존재함' : undefined,
+    hasUniqueValue ? '차별화 포인트가 언급되어 있음' : undefined,
+    hasAcquisition ? '초기 유입 채널 가설이 있음' : undefined,
+    hasWhyNow ? '왜 지금 해야 하는지에 대한 논리가 있음' : undefined,
+    hasTeam ? '팀 강점이 정의되어 있음' : undefined,
+    hasMvp ? 'MVP 범위가 비교적 구체적임' : undefined,
     text.includes('ai') || text.includes('agent') ? 'AI 활용 포인트가 비교적 분명함' : undefined,
     hasCompetitors ? '시장 내 비교 기준이 일부 존재함' : undefined,
   ]).slice(0, 4);
@@ -149,7 +178,12 @@ function evaluateRole(role: AgentEvaluation['role'], input: StartupIdeaInput): A
   const concerns = uniqueNonEmpty([
     !hasCompetitors ? '경쟁 서비스 분석이 부족함' : undefined,
     !hasRevenue ? '수익화 경로가 아직 약함' : undefined,
+    !hasPricing ? '가격 정책 가설이 아직 없음' : undefined,
     !hasTarget ? '누가 첫 고객인지 더 선명해야 함' : undefined,
+    !hasAcquisition ? '초기 유입 채널이 모호함' : undefined,
+    !hasWhyNow ? '왜 지금 이 시장인지 설득 논리가 더 필요함' : undefined,
+    !hasTeam ? '팀의 실행 강점을 보여줄 정보가 부족함' : undefined,
+    !hasMvp ? 'MVP 범위가 넓어질 위험이 있음' : undefined,
     role === 'risk' && /(medical|finance|legal)/.test(text) ? '규제·책임 이슈 검토가 필요함' : undefined,
     role === 'growth' ? '첫 유입 채널과 재방문 구조를 더 구체화해야 함' : undefined,
   ]).slice(0, 4);
@@ -158,7 +192,8 @@ function evaluateRole(role: AgentEvaluation['role'], input: StartupIdeaInput): A
     '초기 고객 인터뷰 5~10건으로 실제 pain point를 검증하기',
     hasCompetitors ? '경쟁사 대비 차별 포인트를 한 문장으로 정리하기' : '대체재/경쟁사 3개 이상을 조사하기',
     hasRevenue ? '가격 정책 가설을 세워 유료 전환 가능성을 테스트하기' : '유료화 시나리오를 하나로 좁혀보기',
-    'MVP 기능을 1~2개로 줄여 가장 검증 가치가 큰 흐름만 남기기',
+    hasAcquisition ? '획득 채널 하나를 정해 실제 유입 실험을 설계하기' : '초기 유입 채널 하나를 먼저 정하고 측정 지표를 붙이기',
+    hasMvp ? 'MVP 범위를 다시 점검해 1주 내 구현 가능한 수준으로 축소하기' : 'MVP 기능을 1~2개로 줄여 가장 검증 가치가 큰 흐름만 남기기',
   ]).slice(0, 3);
 
   const summaryMap = {
@@ -218,6 +253,7 @@ function buildModerator(input: StartupIdeaInput, evaluations: AgentEvaluation[],
     evaluations.some((item) => item.strengths.includes('문제 정의가 어느 정도 명확함')) ? '아이디어의 문제 정의는 비교적 명확하다.' : undefined,
     evaluations.some((item) => item.concerns.includes('경쟁 서비스 분석이 부족함')) ? '경쟁 구도 분석은 더 필요하다.' : undefined,
     evaluations.some((item) => item.concerns.includes('수익화 경로가 아직 약함')) ? '수익화 경로를 더 구체화해야 한다.' : undefined,
+    evaluations.some((item) => item.concerns.includes('초기 유입 채널이 모호함')) ? '고객 획득 채널 검증이 중요하다.' : undefined,
     '초기 고객 검증이 다음 단계에서 가장 중요하다.',
   ]).slice(0, 4);
 
@@ -246,7 +282,7 @@ function aggregate(input: StartupIdeaInput, evaluations: AgentEvaluation[], deba
   return {
     overallScore,
     investmentVerdict: investmentVerdictFromScore(overallScore),
-    oneLiner: `${input.title}는 ${input.targetCustomer || '명확한 고객군'}을 위한 아이디어로, 초기 검증 가치가 있지만 시장 근거를 더 쌓아야 합니다.`,
+    oneLiner: `${input.title}는 ${input.targetCustomer || input.customerSegment || '명확한 고객군'}을 위한 아이디어로, 초기 검증 가치가 있지만 시장 근거를 더 쌓아야 합니다.`,
     topStrengths,
     topRisks,
     nextActions: [

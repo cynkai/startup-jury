@@ -4,10 +4,17 @@ export interface StartupIdeaInput {
   title: string;
   summary: string;
   targetCustomer?: string;
+  customerSegment?: string;
   problem?: string;
   solution?: string;
+  uniqueValue?: string;
   revenueModel?: string;
+  pricingHint?: string;
+  acquisitionChannel?: string;
   marketRegion?: string;
+  whyNow?: string;
+  teamStrength?: string;
+  mvpScope?: string;
   competitors?: string[];
   stage?: 'idea' | 'prototype' | 'mvp' | 'launched';
 }
