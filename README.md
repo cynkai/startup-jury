@@ -30,6 +30,12 @@ The project was built as a demonstration of multi-agent interaction, conversatio
 
 ---
 
+> **Project Type**: Hackathon Project  
+> **Development Period**: May 2026  
+> **Architecture**: Multi-Agent AI Simulation  
+> **Backend**: TypeScript + Express  
+> **Frontend**: HTML / CSS / JavaScript
+
 ## 📖 Project Background
 
 Startup investment decisions are rarely made by a single person.
