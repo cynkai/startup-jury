@@ -30,6 +30,28 @@ The project was built as a demonstration of multi-agent interaction, conversatio
 
 ---
 
+## 📖 Project Background
+
+Startup investment decisions are rarely made by a single person.
+
+In real investment committees, venture capitalists, market analysts, technical reviewers, and risk specialists examine the same startup from different perspectives. They discuss their opinions, challenge each other's assumptions, and eventually reach a collective decision.
+
+This project started from a simple question:
+
+> **"What if we could simulate an investment committee using multiple AI agents instead of a single AI response?"**
+
+Rather than generating only one evaluation, Startup Jury models several specialized AI reviewers that independently analyze a startup idea, participate in a structured discussion, and produce a moderator's final investment recommendation.
+
+The goal of this project is not to replace professional investors, but to demonstrate how **multi-agent collaboration**, **structured reasoning**, and **conversational interfaces** can create a more transparent and explainable decision-making process.
+
+## 💡 Why Multi-Agent?
+
+Traditional AI evaluators generate a single response, making it difficult to understand how different perspectives influence the final decision.
+
+Startup Jury adopts a multi-agent approach where each AI reviewer focuses on a different aspect of a startup.
+
+This makes the evaluation process more transparent, encourages structured debate, and produces a moderator summary that reflects multiple viewpoints instead of a single opinion.
+
 ## Features
 
 ### Multi-Agent Investment Committee
