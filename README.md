@@ -6,6 +6,10 @@
 
 ---
 
+## Preview
+
+![Dashboard](docs/images/dashboard.png)
+
 ## Overview
 
 Startup Jury is a web-based demonstration platform that simulates how an investment committee evaluates startup ideas.
@@ -57,6 +61,10 @@ Traditional AI evaluators generate a single response, making it difficult to und
 Startup Jury adopts a multi-agent approach where each AI reviewer focuses on a different aspect of a startup.
 
 This makes the evaluation process more transparent, encourages structured debate, and produces a moderator summary that reflects multiple viewpoints instead of a single opinion.
+
+## Architecture
+
+![Architecture](docs/images/architecture.png)
 
 ## Features
 
