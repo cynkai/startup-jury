@@ -217,7 +217,7 @@ public/
 ### Clone
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/startup-jury.git
+git clone https://github.com/cynkai/startup-jury.git
 cd startup-jury
 ```
 
