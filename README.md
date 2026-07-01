@@ -6,6 +6,13 @@
 
 ---
 
+* TypeScript
+* Node.js
+* Express
+* Zod
+* Multi-Agent
+* Hackathon Project
+
 ## Preview
 
 ![Dashboard](docs/images/dashboard.png)
