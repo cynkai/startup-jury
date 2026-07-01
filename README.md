@@ -68,19 +68,31 @@ This makes the evaluation process more transparent, encourages structured debate
 
 ![Architecture](docs/images/architecture.png)
 
+The client submits startup ideas to the backend API, which coordinates multiple AI agents. Their evaluations are aggregated by a moderator before generating the final investment report.
+
 ## Features
 
-### Multi-Agent Investment Committee
+User Idea
+      │
+      ▼
 
-Five specialized AI reviewers evaluate each startup idea.
+ VC
+ Market
+ Tech
+ Growth
+ Risk
 
-- VC Agent
-- Market Agent
-- Tech Agent
-- Growth Agent
-- Risk Agent
+      │
 
-Each reviewer has its own evaluation criteria and score.
+ Debate
+
+      │
+
+ Moderator
+
+      │
+
+ Final Verdict
 
 ---
 
@@ -171,25 +183,10 @@ Evaluation results can be exported as
 
 ## Tech Stack
 
-### Frontend
-
-- HTML
-- CSS
-- Vanilla JavaScript
-
-### Backend
-
-- TypeScript
-- Node.js
-- Express
-
-### Validation
-
-- Zod
-
-### Runtime
-
-- tsx
+![TypeScript]
+![Node.js]
+![Express]
+![Zod]
 
 ---
 
