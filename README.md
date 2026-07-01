@@ -22,6 +22,8 @@ The project was built as a demonstration of multi-agent interaction, conversatio
 
 ## Demo
 
+![Demo](docs/images/demo.mov)
+
 ### Workflow
 
 1. Login
