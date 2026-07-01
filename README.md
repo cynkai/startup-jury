@@ -75,7 +75,7 @@ This makes the evaluation process more transparent, encourages structured debate
 
 ![Architecture](docs/images/architecture.png)
 
-The client submits startup ideas to the backend API, which coordinates multiple AI agents. Their evaluations are aggregated by a moderator before generating the final investment report.
+The backend coordinates multiple AI agents, aggregates their evaluations through the Moderator, and generates the final investment report.
 
 ## Features
 
@@ -286,14 +286,13 @@ POST /evaluate
 
 ---
 
-## Repository
+## What this project demonstrates
 
 This project demonstrates
 
 - Multi-agent workflow design
 - Backend API development
 - Conversational interface design
-- Startup evaluation logic
 - TypeScript backend architecture
 
 ---
