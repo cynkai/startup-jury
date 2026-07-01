@@ -6,15 +6,11 @@ dist/
 
 # Environment
 .env
-.env.local
 
 # macOS
 .DS_Store
 
-# Logs
-*.log
-
-# OpenClaw files
+# OpenClaw
 .openclaw/
 
 AGENTS.md
