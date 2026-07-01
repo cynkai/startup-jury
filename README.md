@@ -139,31 +139,31 @@ Evaluation results can be exported as
 
 ### Login
 
-> docs/images/login.png
+![Login](docs/images/login.png)
 
 ---
 
 ### Dashboard
 
-> docs/images/dashboard.png
+![Dashboard](docs/images/dashboard.png)
 
 ---
 
 ### Live Debate
 
-> docs/images/debate.png
+![Live Debate](docs/images/debate.png)
 
 ---
 
 ### Agent Scorecards
 
-> docs/images/scorecards.png
+![Agent Scorecards](docs/images/scorecards.png)
 
 ---
 
 ### Final Verdict
 
-> docs/images/verdict.png
+![Final Verdict](docs/images/verdict.png)
 
 ---
 
