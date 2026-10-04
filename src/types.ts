@@ -1,4 +1,5 @@
 export type AgentRole = 'vc' | 'market' | 'tech' | 'growth' | 'risk';
+export type InvestmentVerdict = 'invest' | 'watch' | 'pass';
 export type TranscriptSpeaker = AgentRole | 'moderator';
 
 export interface StartupIdeaInput {
@@ -54,6 +55,9 @@ export interface AgentEvaluation {
 
 export interface AgentDebateTurn {
   role: AgentRole;
+  round: number;
+  addressedTo?: AgentRole;
+  message: string;
   stance: 'bullish' | 'neutral' | 'bearish';
   agreesWith: AgentRole[];
   rebuttals: string[];
@@ -74,11 +78,15 @@ export interface ModeratorSummary {
   disagreements: string[];
   finalReasoning: string;
   confidence: number;
+  verdict: InvestmentVerdict;
 }
 
 export interface FinalAssessment {
   overallScore: number;
-  investmentVerdict: 'invest' | 'watch' | 'pass';
+  /** The moderator's decision (LLM mode) or the score-based verdict (rule-based mode). */
+  investmentVerdict: InvestmentVerdict;
+  /** The verdict implied by overallScore alone (invest >= 78, watch >= 55). */
+  scoreVerdict: InvestmentVerdict;
   oneLiner: string;
   topStrengths: string[];
   topRisks: string[];
@@ -96,6 +104,7 @@ export interface EvaluationResponse {
   meta: {
     usedLLM: boolean;
     generatedAt: string;
+    debateRounds: number;
     llmError?: string;
   };
 }

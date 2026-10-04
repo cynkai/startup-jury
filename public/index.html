@@ -1010,6 +1010,9 @@
         lines.push('');
         lines.push(`- Overall Score: **${data.finalAssessment.overallScore}**`);
         lines.push(`- Verdict: **${data.finalAssessment.investmentVerdict.toUpperCase()}**`);
+        if (data.finalAssessment.scoreVerdict && data.finalAssessment.scoreVerdict !== data.finalAssessment.investmentVerdict) {
+          lines.push(`- Score-based verdict: ${data.finalAssessment.scoreVerdict.toUpperCase()}`);
+        }
         lines.push(`- Moderator Confidence: **${data.moderator.confidence}**`);
         lines.push(`- Mode: ${data.meta.usedLLM ? 'LLM' : 'Fallback'}`);
         lines.push('');
@@ -1176,9 +1179,14 @@
         }
       }
 
+      // Agent text comes from the LLM and can echo the pitch, so it is escaped before it goes into innerHTML.
+      function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
+      }
+
       function liItems(items) {
         if (!items || items.length === 0) return '<li>없음</li>';
-        return items.map((item) => `<li>${item}</li>`).join('');
+        return items.map((item) => `<li>${escapeHtml(item)}</li>`).join('');
       }
       function verdictPillClass(v) {
         return v === 'invest' ? 'invest' : v === 'watch' ? 'watch' : 'pass';
@@ -1203,11 +1211,11 @@
               <div class="agent-head">
                 <div>
                   <div class="agent-role">${speakerMeta[agent.role]?.label || agent.role}</div>
-                  <div class="agent-summary">${agent.summary}</div>
+                  <div class="agent-summary">${escapeHtml(agent.summary)}</div>
                 </div>
                 <div class="agent-score">${agent.score}</div>
               </div>
-              <div class="chips">${(agent.strengths || []).map((s) => `<span class="chip">${s}</span>`).join('')}</div>
+              <div class="chips">${(agent.strengths || []).map((s) => `<span class="chip">${escapeHtml(s)}</span>`).join('')}</div>
               <div class="bars">${bars}</div>
               <div class="mini-grid" style="margin-top: 14px;">
                 <div class="list-card">
@@ -1228,10 +1236,10 @@
         const container = document.getElementById('debate-list');
         container.innerHTML = debate.map((item) => `
           <div class="debate-card">
-            <div class="debate-title">${speakerMeta[item.role]?.label || item.role} · ${item.stance.toUpperCase()}</div>
+            <div class="debate-title">${item.round ? `라운드 ${item.round} · ` : ''}${speakerMeta[item.role]?.label || item.role} · ${escapeHtml(item.stance).toUpperCase()}</div>
             <div class="debate-meta">동의: ${(item.agreesWith || []).map(r => speakerMeta[r]?.label || r).join(', ') || '없음'} · 수정 점수: ${item.revisedScore}</div>
             <ul class="clean">${liItems(item.rebuttals)}</ul>
-            <div style="margin-top: 10px; color: var(--text); font-weight: 600; line-height: 1.7;">${item.closingNote}</div>
+            <div style="margin-top: 10px; color: var(--text); font-weight: 600; line-height: 1.7;">${escapeHtml(item.closingNote)}</div>
           </div>
         `).join('');
       }
@@ -1316,7 +1324,11 @@
         document.getElementById('moderator-confidence').textContent = data.moderator.confidence;
         document.getElementById('response-mode').textContent = data.meta.usedLLM ? 'LLM' : 'Fallback';
         document.getElementById('one-liner').textContent = data.finalAssessment.oneLiner;
-        document.getElementById('verdict-pill').innerHTML = `<span class="pill ${verdictPillClass(data.finalAssessment.investmentVerdict)}">${data.finalAssessment.investmentVerdict.toUpperCase()}</span>`;
+        const { investmentVerdict, scoreVerdict } = data.finalAssessment;
+        const scoreNote = scoreVerdict && scoreVerdict !== investmentVerdict
+          ? ` <span style="color: var(--muted); font-size: 12px;">점수 기준: ${escapeHtml(scoreVerdict).toUpperCase()}</span>`
+          : '';
+        document.getElementById('verdict-pill').innerHTML = `<span class="pill ${verdictPillClass(investmentVerdict)}">${escapeHtml(investmentVerdict).toUpperCase()}</span>${scoreNote}`;
         document.getElementById('consensus').innerHTML = liItems(data.moderator.consensus);
         document.getElementById('disagreements').innerHTML = liItems(data.moderator.disagreements);
         document.getElementById('final-reasoning').textContent = data.moderator.finalReasoning;

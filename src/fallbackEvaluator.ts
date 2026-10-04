@@ -1,10 +1,10 @@
 import { AGENT_ROLES } from './agents.js';
 import { normalizeIdea } from './normalize.js';
+import { buildTranscript } from './transcript.js';
 import {
   AgentDebateTurn,
   AgentEvaluation,
   AgentRole,
-  DebateTranscriptMessage,
   EvaluationResponse,
   FinalAssessment,
   ModeratorSummary,
@@ -158,6 +158,7 @@ function buildDebate(evaluations: AgentEvaluation[]): AgentDebateTurn[] {
       .filter((other) => other.role !== evaluation.role && Math.abs(other.score - evaluation.score) <= 8)
       .map((other) => other.role)
       .slice(0, 2);
+    const addressedTo = strongest.role !== evaluation.role ? strongest.role : weakest.role;
     const rebuttals = uniqueNonEmpty([
       strongest.role !== evaluation.role
         ? `${ROLE_LABEL[strongest.role]}의 낙관론은 시장 근거가 더 필요합니다.`
@@ -165,7 +166,7 @@ function buildDebate(evaluations: AgentEvaluation[]): AgentDebateTurn[] {
       weakest.role !== evaluation.role
         ? `${ROLE_LABEL[weakest.role]}의 우려는 MVP 범위를 좁히면 일부 완화됩니다.`
         : undefined,
-      evaluation.concerns[0] ? `지금 가장 큰 쟁점은 ${evaluation.concerns[0]}입니다.` : undefined,
+      evaluation.concerns[0] ? `지금 가장 큰 쟁점: ${evaluation.concerns[0]}` : undefined,
     ]).slice(0, 2);
 
     const revisedScore = clampScore(
@@ -174,6 +175,9 @@ function buildDebate(evaluations: AgentEvaluation[]): AgentDebateTurn[] {
 
     return {
       role: evaluation.role,
+      round: 1,
+      addressedTo,
+      message: rebuttals.join(' '),
       stance,
       agreesWith,
       rebuttals,
@@ -207,6 +211,7 @@ function buildModerator(idea: NormalizedIdea, evaluations: AgentEvaluation[], de
     disagreements,
     finalReasoning: `${idea.title}는 초기 검증 가치는 충분하지만 지금 당장 확신 있는 투자 판단보다는 고객 검증과 차별화 정의를 먼저 끝내는 것이 합리적입니다.`,
     confidence: clampScore(avgDebateScore - (disagreements.length > 1 ? 8 : 3)),
+    verdict: investmentVerdictFromScore(avgDebateScore),
   };
 }
 
@@ -218,6 +223,7 @@ function aggregate(idea: NormalizedIdea, evaluations: AgentEvaluation[], debate:
   return {
     overallScore,
     investmentVerdict: investmentVerdictFromScore(overallScore),
+    scoreVerdict: investmentVerdictFromScore(overallScore),
     oneLiner: `${idea.title}는 ${idea.signals.hasTarget ? '비교적 분명한 사용자 그룹' : '아직 모호한 사용자 그룹'}을 향한 아이디어로, 빠른 시장 검증 가치는 있다.`,
     topStrengths,
     topRisks,
@@ -228,115 +234,6 @@ function aggregate(idea: NormalizedIdea, evaluations: AgentEvaluation[], debate:
       '첫 유입 채널 한 곳에서 작은 실험을 돌린다.',
     ],
   };
-}
-
-function findTurn(debate: AgentDebateTurn[], role: AgentRole): AgentDebateTurn | undefined {
-  return debate.find((d) => d.role === role);
-}
-
-function buildTranscript(
-  idea: NormalizedIdea,
-  evaluations: AgentEvaluation[],
-  debate: AgentDebateTurn[],
-  moderator: ModeratorSummary,
-  finalAssessment: FinalAssessment,
-): DebateTranscriptMessage[] {
-  const byRole = Object.fromEntries(evaluations.map((e) => [e.role, e])) as Record<AgentRole, AgentEvaluation>;
-  const messages: DebateTranscriptMessage[] = [];
-
-  messages.push({
-    id: 'mod-open',
-    speaker: 'moderator',
-    phase: 'moderation',
-    text: `오늘 안건은 "${idea.title}"입니다. VC, Market, Tech, Growth, Risk 다섯 에이전트의 의견을 차례로 듣고 토론하겠습니다.`,
-  });
-
-  messages.push({
-    id: 'open-vc',
-    speaker: 'vc',
-    phase: 'opening',
-    text: `투자 관점에서는 ${byRole.vc.score}점입니다. ${byRole.vc.summary} ${byRole.vc.strengths[0] || ''}`.trim(),
-  });
-
-  messages.push({
-    id: 'open-market',
-    speaker: 'market',
-    phase: 'opening',
-    addressedTo: 'vc',
-    text: `VC 의견 잘 들었습니다. 다만 시장 관점에서는 더 신중합니다. ${byRole.market.summary} 특히 ${byRole.market.concerns[0] || '실제 통증의 강도'}가 가장 큰 변수라고 봅니다.`,
-  });
-
-  messages.push({
-    id: 'rebut-vc-market',
-    speaker: 'vc',
-    phase: 'challenge',
-    addressedTo: 'market',
-    text: `Market 의견에 한 가지 반박하겠습니다. 사용자의 구매 의사가 약하더라도, ${idea.signals.hasRevenue ? '제시된 수익 모델' : '구독 기반 모델'} 자체는 작은 세그먼트에서도 작동할 수 있습니다. ${findTurn(debate, 'vc')?.rebuttals?.[0] || ''}`.trim(),
-  });
-
-  messages.push({
-    id: 'open-tech',
-    speaker: 'tech',
-    phase: 'opening',
-    addressedTo: 'moderator',
-    text: `기술 쪽에서 말하자면 ${byRole.tech.score}점입니다. ${byRole.tech.summary} ${idea.signals.isAiNative ? 'AI 활용 자체는 자연스러워 보입니다.' : '기술 난이도는 평이합니다.'}`,
-  });
-
-  messages.push({
-    id: 'rebut-risk-tech',
-    speaker: 'risk',
-    phase: 'challenge',
-    addressedTo: 'tech',
-    text: `Tech의 낙관에 대해 한 가지 짚겠습니다. ${idea.signals.isRegulated ? '규제 도메인 가능성' : '신뢰성·검증 부담'}이 있으면 같은 기능이라도 실행 난이도가 올라갑니다. ${findTurn(debate, 'risk')?.rebuttals?.[0] || ''}`.trim(),
-  });
-
-  messages.push({
-    id: 'open-growth',
-    speaker: 'growth',
-    phase: 'opening',
-    addressedTo: 'risk',
-    text: `Risk 의견에 일부 공감하지만 성장 관점도 봐야 합니다. ${byRole.growth.summary} ${idea.signals.hasAcquisition ? '획득 채널 가설이 있는 점은 긍정적입니다.' : '첫 유입 채널 가설을 더 분명히 세워야 합니다.'}`,
-  });
-
-  messages.push({
-    id: 'rebut-market-growth',
-    speaker: 'market',
-    phase: 'response',
-    addressedTo: 'growth',
-    text: `Growth의 의견을 받아 다시 말하면, 시장 자체가 작더라도 ${idea.signals.isB2b ? 'B2B 시장은 가격이 견고하다는 장점' : '커뮤니티 기반 확산이라는 장점'}이 있습니다. 다만 첫 30명 사용자 시나리오는 더 구체적이어야 합니다.`,
-  });
-
-  messages.push({
-    id: 'mod-mid',
-    speaker: 'moderator',
-    phase: 'moderation',
-    text: `잠깐 정리하면, 패널은 ${moderator.consensus[0] || '문제 정의의 명확성'}에는 어느 정도 동의했지만 ${moderator.disagreements[0] || '리스크와 성장성 해석'}에서 의견이 갈리고 있습니다.`,
-  });
-
-  messages.push({
-    id: 'final-vc',
-    speaker: 'vc',
-    phase: 'response',
-    addressedTo: 'moderator',
-    text: `종합해서 VC 쪽은 ${findTurn(debate, 'vc')?.revisedScore || byRole.vc.score}점으로 갱신합니다. 차별화 정의와 가격 가설 검증이 핵심이 될 겁니다.`,
-  });
-
-  messages.push({
-    id: 'final-risk',
-    speaker: 'risk',
-    phase: 'response',
-    addressedTo: 'moderator',
-    text: `Risk 쪽은 ${findTurn(debate, 'risk')?.revisedScore || byRole.risk.score}점입니다. ${byRole.risk.concerns[0] || '검증 부족'}이 해결되지 않으면 같은 점수를 유지할 겁니다.`,
-  });
-
-  messages.push({
-    id: 'mod-verdict',
-    speaker: 'moderator',
-    phase: 'verdict',
-    text: `최종 판정은 ${finalAssessment.investmentVerdict.toUpperCase()}입니다. 종합 점수 ${finalAssessment.overallScore}점, 모더레이터 신뢰도 ${moderator.confidence}점. 다음 2주 안의 우선 액션은 "${finalAssessment.nextActions[0]}"입니다.`,
-  });
-
-  return messages;
 }
 
 export function evaluateWithFallback(input: StartupIdeaInput): EvaluationResponse {
@@ -358,6 +255,7 @@ export function evaluateWithFallback(input: StartupIdeaInput): EvaluationRespons
     meta: {
       usedLLM: false,
       generatedAt: new Date().toISOString(),
+      debateRounds: 1,
     },
   };
 }
