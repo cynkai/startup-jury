@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 export const config = {
   port: Number(process.env.PORT || 4000),
@@ -9,4 +9,6 @@ export const config = {
   openAiModel: process.env.OPENAI_MODEL || 'gpt-4o-mini',
 };
 
-export const hasOpenAi = Boolean(config.openAiApiKey);
+export function hasOpenAi(): boolean {
+  return Boolean(config.openAiApiKey);
+}
