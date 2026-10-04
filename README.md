@@ -35,24 +35,31 @@ To use an LLM, copy `.env.example` to `.env` and set `OPENAI_API_KEY`. Any OpenA
 | `OPENAI_API_KEY` | (empty) | Empty → rule-based mode |
 | `OPENAI_BASE_URL` | `https://api.openai.com/v1` | Chat Completions endpoint |
 | `OPENAI_MODEL` | `gpt-4o-mini` | Model name |
+| `DEBATE_ROUNDS` | `2` | Debate rounds in LLM mode (1–3) |
 
 ## How it works
 
 The reviewers are VC, Market, Tech, Growth and Risk agents, plus a Moderator.
 
 **LLM mode** (`OPENAI_API_KEY` set)
-1. Each reviewer scores the pitch (0–100) with strengths, concerns and recommendations.
-2. Each reviewer reads the others' evaluations once and returns rebuttals and a revised score.
-3. The Moderator summarises consensus, disagreements and a confidence value.
-4. The overall score is the mean of the revised scores: `invest` ≥ 78, `watch` ≥ 55, otherwise `pass`.
+1. **Opening:** each reviewer scores the pitch (0–100) with strengths, concerns and recommendations. These run in parallel so the reviewers do not influence each other.
+2. **Debate:** `DEBATE_ROUNDS` rounds (default 2). Reviewers speak one at a time in a fixed order; each speaker sees every opening and every earlier turn,
+   picks one panelist to answer, and may revise their score.
+3. **Moderator:** reads everything and makes the final call (`invest`, `watch` or `pass`), with consensus, disagreements, confidence and next actions.
+   The overall score is the mean of the reviewers' final scores. The score alone implies a verdict (`invest` ≥ 78, `watch` ≥ 55, otherwise `pass`);
+   the response keeps it as `scoreVerdict`, and when the moderator disagrees the reasoning says why.
+
+One evaluation makes 5 + 5 × rounds + 1 calls (16 with the default), and the debate calls are sequential, so expect it to take a while.
+The UI transcript is built only from these outputs; the moderator's opening and verdict lines are the only fixed text.
+
+The pitch is untrusted input: it is wrapped in `<pitch>` tags that the pitch itself cannot close, and the prompts tell the model to treat it as data.
+This makes prompt injection harder, not impossible. The UI escapes model output before rendering it.
 
 If an LLM call fails, the server answers with the rule-based result and adds `meta.llmError`.
 
 **Rule-based mode** (no key) looks for keywords in the pitch (target customer, revenue model, pricing, channels, competitors, MVP scope, regulated domain, hardware, …)
-and turns them into scores with fixed weights. It is deterministic and useful for trying the UI, but it does not understand the idea.
-
-**Known limitation:** the chat-style transcript shown in the UI is a fixed sequence of lines filled in with the agents' scores and texts, so it reads like a debate
-even though the agents only exchange one round. This is being replaced with a transcript built from the actual turns.
+and turns them into scores with fixed weights. Its "debate" is one round of rule-generated remarks, and the verdict follows the score.
+It is deterministic and useful for trying the UI, but it does not understand the idea.
 
 The login screen only stores a display name in the browser's `localStorage`; there is no authentication.
 
@@ -106,6 +113,7 @@ src/
   agents.ts             Reviewer definitions
   llmEvaluator.ts       LLM mode
   fallbackEvaluator.ts  Rule-based mode
+  transcript.ts         Builds the chat transcript from agent output
   normalize.ts          Keyword signals used by both modes
   schema.ts             Request validation (Zod)
   scenarios.ts          Demo pitches
@@ -129,6 +137,8 @@ npm run build && npm start   # production build in dist/
 - Keyword matching in rule-based mode now matches whole English words ("email" no longer counts as "AI", "Seoul" as "SEO")
   and no longer treats month names, "예약" or "요약" as revenue or regulation signals.
 - Added tests and GitHub Actions CI.
+- LLM mode now runs a real debate: sequential rounds where each reviewer answers earlier turns, a transcript built from those turns instead of a template,
+  and a moderator who makes the final call. The pitch is fenced against prompt injection and the UI escapes model output.
 
 ## License
 
