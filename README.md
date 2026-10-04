@@ -8,7 +8,7 @@
 
 ## About this repository
 
-Startup Jury was built for a hackathon in May 2026. The version submitted there is kept as the git tag
+Startup Jury was built for the Genspark Hackathon in May 2026. The version submitted there is kept as the git tag
 [`hackathon-submission`](../../tree/hackathon-submission). Later commits fix the documentation and bugs found after the event;
 see [Changes since the hackathon](#changes-since-the-hackathon).
 
