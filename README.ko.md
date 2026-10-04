@@ -99,6 +99,7 @@ curl -s http://localhost:4000/evaluate \
 
 ```
 src/
+  index.ts              진입점(서버 시작)
   server.ts             Express 앱과 라우트
   agents.ts             심사위원 정의
   llmEvaluator.ts       LLM 모드
@@ -111,10 +112,21 @@ public/
   index.html            단일 페이지 UI(빌드 단계 없음)
 ```
 
+## 개발
+
+```bash
+npm test           # 단위·API 테스트 (API 키나 네트워크 필요 없음)
+npm run typecheck
+npm run build && npm start   # dist/에 프로덕션 빌드
+```
+
 ## 해커톤 이후 변경 사항
 
 - README를 코드에 맞게 다시 썼습니다(예전 예시 요청에는 API가 받지 않는 필드가 들어 있었습니다).
 - 예전 README가 언급하던 MIT `LICENSE` 파일을 추가했습니다.
+- 규칙 기반 모드의 키워드 매칭이 영어 단어를 단어 단위로 찾습니다("email"을 "AI"로, "Seoul"을 "SEO"로 세지 않음).
+  "3월" 같은 날짜나 "예약", "요약"을 수익·규제 신호로 보지 않습니다.
+- 테스트와 GitHub Actions CI를 추가했습니다.
 
 ## 라이선스
 

@@ -101,6 +101,7 @@ The [architecture diagram](docs/images/architecture.png) is the one submitted to
 
 ```
 src/
+  index.ts              Entry point (starts the server)
   server.ts             Express app and routes
   agents.ts             Reviewer definitions
   llmEvaluator.ts       LLM mode
@@ -113,10 +114,21 @@ public/
   index.html            Single-page UI (no build step)
 ```
 
+## Development
+
+```bash
+npm test           # unit and API tests (no API key or network needed)
+npm run typecheck
+npm run build && npm start   # production build in dist/
+```
+
 ## Changes since the hackathon
 
 - README rewritten to match the code (the old example request used fields the API does not accept).
 - Added the MIT `LICENSE` file the old README referred to.
+- Keyword matching in rule-based mode now matches whole English words ("email" no longer counts as "AI", "Seoul" as "SEO")
+  and no longer treats month names, "예약" or "요약" as revenue or regulation signals.
+- Added tests and GitHub Actions CI.
 
 ## License
 
