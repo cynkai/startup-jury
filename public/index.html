@@ -104,7 +104,7 @@
 
       .hero-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 10px;
         margin-top: 26px;
       }
@@ -180,7 +180,7 @@
 
       .stepper {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(5, minmax(0, 1fr));
         gap: 8px;
         margin-bottom: 12px;
       }
@@ -219,7 +219,7 @@
 
       .panel-strip {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(5, minmax(0, 1fr));
         gap: 10px;
         margin-bottom: 14px;
       }
@@ -352,7 +352,7 @@
 
       .layout {
         display: grid;
-        grid-template-columns: 420px 1fr;
+        grid-template-columns: 420px minmax(0, 1fr);
         gap: 22px;
       }
 
@@ -379,7 +379,7 @@
 
       .summary-grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 12px;
       }
 
@@ -405,7 +405,7 @@
 
       .hero-summary {
         display: grid;
-        grid-template-columns: 1.2fr 0.8fr;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
         gap: 14px;
         margin-top: 18px;
       }
@@ -445,7 +445,7 @@
       .pill.watch { background: rgba(251,191,36,0.14); color: var(--yellow); }
       .pill.pass { background: rgba(248,113,113,0.14); color: var(--red); }
 
-      .mini-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .mini-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
       .list-title {
         font-size: 11px;
         font-weight: 800;
@@ -556,7 +556,7 @@
         50% { opacity: 1; transform: translateY(-2px); }
       }
 
-      .agents-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+      .agents-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 14px; }
       .agent-card {
         border-radius: 22px;
         padding: 18px;
@@ -599,7 +599,7 @@
       .debate-title { font-size: 16px; font-weight: 800; margin-bottom: 6px; }
       .debate-meta { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
 
-      .section-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      .section-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
 
       .empty-state {
         display: grid;
@@ -624,11 +624,12 @@
 
       @media (max-width: 1080px) {
         .login-card, .layout, .hero-summary, .section-grid { grid-template-columns: 1fr; }
-        .summary-grid, .agents-grid, .mini-grid, .hero-grid { grid-template-columns: 1fr 1fr; }
+        .summary-grid, .hero-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .left-pane { position: static; }
       }
       @media (max-width: 720px) {
         .summary-grid, .agents-grid, .mini-grid, .hero-grid { grid-template-columns: 1fr; }
+        .stepper, .panel-strip { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
         .topbar { flex-direction: column; align-items: flex-start; }
       }
     </style>
@@ -1322,7 +1323,11 @@
         document.getElementById('overall-score').textContent = data.finalAssessment.overallScore;
         document.getElementById('overall-verdict').textContent = data.finalAssessment.investmentVerdict.toUpperCase();
         document.getElementById('moderator-confidence').textContent = data.moderator.confidence;
-        document.getElementById('response-mode').textContent = data.meta.usedLLM ? 'LLM' : 'Fallback';
+        document.getElementById('response-mode').textContent = data.meta.usedLLM ? 'LLM' : data.meta.llmError ? 'Fallback (LLM 실패)' : 'Fallback';
+        if (data.meta.llmError) {
+          errorBox.classList.remove('hidden');
+          errorBox.textContent = `LLM 호출에 실패해 규칙 기반 결과를 표시합니다. 원인: ${data.meta.llmError}`;
+        }
         document.getElementById('one-liner').textContent = data.finalAssessment.oneLiner;
         const { investmentVerdict, scoreVerdict } = data.finalAssessment;
         const scoreNote = scoreVerdict && scoreVerdict !== investmentVerdict

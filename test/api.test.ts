@@ -72,7 +72,8 @@ test('POST /evaluate rejects an invalid body with 400', async () => {
 
 test('POST /evaluate falls back to rules and reports the error when the LLM fails', async () => {
   const failing = await listen((_req, res) => {
-    res.writeHead(500).end();
+    res.writeHead(401, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: { message: 'Incorrect API key provided: sk-proj-abc123****wxyz.' } }));
   });
   config.openAiApiKey = 'test-key';
   config.openAiBaseUrl = failing.url;
@@ -81,7 +82,9 @@ test('POST /evaluate falls back to rules and reports the error when the LLM fail
     assert.equal(res.status, 200);
     const body = await res.json();
     assert.equal(body.meta.usedLLM, false);
-    assert.match(body.meta.llmError, /500/);
+    assert.match(body.meta.llmError, /401/);
+    assert.match(body.meta.llmError, /Incorrect API key provided/);
+    assert.doesNotMatch(body.meta.llmError, /abc123|wxyz/, 'key fragments are masked');
   } finally {
     config.openAiApiKey = '';
     failing.server.close();

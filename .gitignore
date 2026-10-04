@@ -9,14 +9,3 @@ dist/
 
 # macOS
 .DS_Store
-
-# OpenClaw
-.openclaw/
-
-AGENTS.md
-BOOTSTRAP.md
-HEARTBEAT.md
-IDENTITY.md
-SOUL.md
-TOOLS.md
-USER.md

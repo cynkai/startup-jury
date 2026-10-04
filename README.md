@@ -39,6 +39,9 @@ To use an LLM, copy `.env.example` to `.env` and set `OPENAI_API_KEY`. Any OpenA
 | `OPENAI_REASONING_EFFORT` | (model default) | Optional, for reasoning models |
 | `DEBATE_ROUNDS` | `2` | Debate rounds in LLM mode (1–3) |
 
+> **Run it locally.** The server has no authentication, no rate limit and allows any origin (CORS).
+> If you deploy it somewhere public with `OPENAI_API_KEY` set, anyone who finds it can spend your API credits, 16 calls per evaluation.
+
 ## How it works
 
 The reviewers are VC, Market, Tech, Growth and Risk agents, plus a Moderator.
@@ -108,7 +111,7 @@ An invalid body returns `400` with the validation details.
 ## UI
 
 Pick a demo scenario or type a pitch, watch the panel, then export the result as JSON or copy a Markdown report.
-The UI text is Korean.
+The UI text is Korean. The screenshots come from a real gpt-5.4-mini run of the OneSeat Salon scenario.
 
 | Debate | Scorecards | Verdict |
 |---|---|---|
@@ -153,6 +156,8 @@ npm run build && npm start   # production build in dist/
   and a moderator who makes the final call. The pitch is fenced against prompt injection and the UI escapes model output.
 - Default model is now gpt-5.4-mini (temperature is no longer forced, so GPT-5-family models work), the moderator's verdict words are defined,
   responses report token usage, and `/agents` reads the shared agent definitions.
+- The UI shows why an LLM call failed instead of silently falling back, the layout no longer overflows on laptop and phone widths,
+  and the screenshots were retaken from a real LLM run (the old ones showed the removed scripted transcript).
 
 ## License
 
