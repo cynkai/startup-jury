@@ -105,6 +105,8 @@ export interface EvaluationResponse {
     usedLLM: boolean;
     generatedAt: string;
     debateRounds: number;
+    model?: string;
+    usage?: { calls: number; promptTokens: number; completionTokens: number };
     llmError?: string;
   };
 }
