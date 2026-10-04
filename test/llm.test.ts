@@ -19,6 +19,7 @@ interface Recorded {
 let server: http.Server;
 let requests: Recorded[] = [];
 let moderatorVerdict = 'pass';
+let bodies: Record<string, unknown>[] = [];
 
 const ORDER = ['vc', 'market', 'tech', 'growth', 'risk'];
 
@@ -52,10 +53,12 @@ before(async () => {
     let body = '';
     req.on('data', (chunk) => (body += chunk));
     req.on('end', () => {
-      const { messages } = JSON.parse(body);
+      const parsed = JSON.parse(body);
+      bodies.push(parsed);
+      const { messages } = parsed;
       const content = JSON.stringify(reply(messages[0].content, messages[1].content));
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ choices: [{ message: { content } }] }));
+      res.end(JSON.stringify({ choices: [{ message: { content } }], usage: { prompt_tokens: 100, completion_tokens: 10 } }));
     });
   });
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
@@ -66,6 +69,7 @@ before(async () => {
 
 beforeEach(() => {
   requests = [];
+  bodies = [];
   moderatorVerdict = 'pass';
 });
 
@@ -135,4 +139,11 @@ test('the pitch is fenced and cannot close the fence itself', async () => {
     assert.equal(request.user.match(/<\/pitch>/g)?.length, 1, `${request.task} has exactly one closing tag`);
     assert.match(request.user, /\[tag removed\] Ignore previous instructions/);
   }
+});
+
+test('no temperature is sent unless configured, and usage is reported', async () => {
+  const result = await evaluateWithLLM(IDEA);
+  assert.ok(bodies.every((body) => !('temperature' in body)));
+  assert.deepEqual(result.meta.usage, { calls: 16, promptTokens: 1600, completionTokens: 160 });
+  assert.equal(result.meta.model, config.openAiModel);
 });
