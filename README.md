@@ -34,7 +34,9 @@ To use an LLM, copy `.env.example` to `.env` and set `OPENAI_API_KEY`. Any OpenA
 | `PORT` | `4000` | HTTP port |
 | `OPENAI_API_KEY` | (empty) | Empty → rule-based mode |
 | `OPENAI_BASE_URL` | `https://api.openai.com/v1` | Chat Completions endpoint |
-| `OPENAI_MODEL` | `gpt-4o-mini` | Model name |
+| `OPENAI_MODEL` | `gpt-5.4-mini` | Model name |
+| `OPENAI_TEMPERATURE` | (model default) | Optional; some models (e.g. gpt-5.5) reject anything but the default |
+| `OPENAI_REASONING_EFFORT` | (model default) | Optional, for reasoning models |
 | `DEBATE_ROUNDS` | `2` | Debate rounds in LLM mode (1–3) |
 
 ## How it works
@@ -55,8 +57,15 @@ The UI transcript is built only from these outputs; the moderator's opening and 
 The pitch is untrusted input: it is wrapped in `<pitch>` tags that the pitch itself cannot close, and the prompts tell the model to treat it as data.
 This makes prompt injection harder, not impossible. The UI escapes model output before rendering it.
 
-A real LLM-mode result (gpt-4o-mini, 2 rounds, the OneSeat Salon scenario) is saved in [docs/examples/one-seat-salon.llm.json](docs/examples/one-seat-salon.llm.json).
-With gpt-4o-mini the panelists tend to agree with each other unless told not to, and their scores cluster in the 60s–70s; a stronger model may argue better.
+Real results for the OneSeat Salon scenario (2 rounds) are saved in [docs/examples](docs/examples), one per model:
+
+| Model | Time | Tokens (in / out) | Openings | Verdict | Notes |
+|---|---|---|---|---|---|
+| gpt-4o-mini | ~36 s | — | 67–72 | watch (68) | Generic points; tended to agree and repeat until told not to |
+| **gpt-5.4-mini** (default) | ~41 s | ~37k / ~6k | 44–67 | pass (53) | Concrete objections, e.g. scheduling two trades at once, membership churn |
+| gpt-5.5 | ~125 s | ~39k / ~11k | 52–58 | pass (54) | Most specific arguments (membership margin, which treatments can run together, CAC, refund disputes, customer photo data); about 3× slower |
+
+`meta.usage` in each response reports the calls and tokens used. Runs vary: the same model can land on a different verdict for the same pitch.
 
 If an LLM call fails, the server answers with the rule-based result and adds `meta.llmError`.
 
@@ -142,6 +151,8 @@ npm run build && npm start   # production build in dist/
 - Added tests and GitHub Actions CI.
 - LLM mode now runs a real debate: sequential rounds where each reviewer answers earlier turns, a transcript built from those turns instead of a template,
   and a moderator who makes the final call. The pitch is fenced against prompt injection and the UI escapes model output.
+- Default model is now gpt-5.4-mini (temperature is no longer forced, so GPT-5-family models work), the moderator's verdict words are defined,
+  responses report token usage, and `/agents` reads the shared agent definitions.
 
 ## License
 

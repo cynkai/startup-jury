@@ -3,6 +3,7 @@ import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { AGENT_DEFINITIONS, AGENT_ROLES, MODERATOR_DEFINITION } from './agents.js';
 import { hasOpenAi } from './config.js';
 import { evaluateWithFallback } from './fallbackEvaluator.js';
 import { evaluateWithLLM } from './llmEvaluator.js';
@@ -26,14 +27,8 @@ export function createApp() {
 
   app.get('/agents', (_req, res) => {
     res.json({
-      agents: [
-        { role: 'vc', name: 'VC Agent', focus: 'investment attractiveness, moat, scalability, and fundability' },
-        { role: 'market', name: 'Market Agent', focus: 'customer pain, market demand, timing, and competition' },
-        { role: 'tech', name: 'Tech Agent', focus: 'technical feasibility, MVP scope, execution complexity, and defensibility' },
-        { role: 'growth', name: 'Growth Agent', focus: 'go-to-market strategy, retention, distribution, and monetization' },
-        { role: 'risk', name: 'Risk Agent', focus: 'regulatory, operational, adoption, trust, and failure risks' },
-      ],
-      moderator: { role: 'moderator', name: 'Moderator Agent', focus: 'synthesize consensus, disagreements, and final investment reasoning' },
+      agents: AGENT_ROLES.map((role) => ({ role, ...AGENT_DEFINITIONS[role] })),
+      moderator: MODERATOR_DEFINITION,
     });
   });
 

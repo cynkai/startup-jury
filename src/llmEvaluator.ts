@@ -77,7 +77,13 @@ function fencedPitch(idea: NormalizedIdea): string {
   return `<pitch>\n${neutraliseTags(lines.join('\n'))}\n</pitch>`;
 }
 
-async function chatJson<T>(system: string, user: string): Promise<T> {
+interface Usage {
+  calls: number;
+  promptTokens: number;
+  completionTokens: number;
+}
+
+async function chatJson<T>(usage: Usage, system: string, user: string): Promise<T> {
   const response = await fetch(`${config.openAiBaseUrl}/chat/completions`, {
     method: 'POST',
     headers: {
@@ -86,7 +92,8 @@ async function chatJson<T>(system: string, user: string): Promise<T> {
     },
     body: JSON.stringify({
       model: config.openAiModel,
-      temperature: 0.6,
+      ...(config.temperature !== undefined && { temperature: config.temperature }),
+      ...(config.reasoningEffort && { reasoning_effort: config.reasoningEffort }),
       response_format: { type: 'json_object' },
       messages: [
         { role: 'system', content: system },
@@ -101,6 +108,9 @@ async function chatJson<T>(system: string, user: string): Promise<T> {
   }
 
   const data = (await response.json()) as any;
+  usage.calls += 1;
+  usage.promptTokens += Number(data?.usage?.prompt_tokens) || 0;
+  usage.completionTokens += Number(data?.usage?.completion_tokens) || 0;
   const content = data?.choices?.[0]?.message?.content;
   if (!content) throw new Error('No content from model');
   return JSON.parse(content) as T;
@@ -133,9 +143,10 @@ function isVerdict(value: unknown): value is InvestmentVerdict {
   return value === 'invest' || value === 'watch' || value === 'pass';
 }
 
-async function evaluateAgent(idea: NormalizedIdea, role: AgentRole): Promise<AgentEvaluation> {
+async function evaluateAgent(usage: Usage, idea: NormalizedIdea, role: AgentRole): Promise<AgentEvaluation> {
   const agent = AGENT_DEFINITIONS[role];
   const parsed = await chatJson<LlmAgentResponse>(
+    usage,
     `TASK: evaluate. You are ${agent.name} on a startup investment panel. Focus on ${agent.focus}. ` +
       'Score on the full 0-100 range: 50 is a typical early-stage idea, 80+ is rare, below 30 means serious flaws. ' +
       `${FENCE_RULES}${languageRule(idea)}`,
@@ -167,6 +178,7 @@ function debateData(debate: AgentDebateTurn[]) {
 }
 
 async function debateTurn(
+  usage: Usage,
   idea: NormalizedIdea,
   self: AgentEvaluation,
   evaluations: AgentEvaluation[],
@@ -180,6 +192,7 @@ async function debateTurn(
   const currentScore = previous?.revisedScore ?? self.score;
 
   const parsed = await chatJson<LlmDebateResponse>(
+    usage,
     `TASK: debate. You are ${agent.name} (role "${self.role}") on a startup investment panel, focused on ${agent.focus}. ` +
       `This is debate round ${round} of ${rounds}. Speak like a panelist in a meeting: pick one specific claim another panelist made ` +
       'and challenge or sharpen it from your own role\'s angle. Do not restate points already made, do not just agree, ' +
@@ -213,17 +226,18 @@ async function debateTurn(
 }
 
 /** Rounds run in order and agents speak one after another, so every speaker sees what was said before. */
-async function runDebate(idea: NormalizedIdea, evaluations: AgentEvaluation[], rounds: number): Promise<AgentDebateTurn[]> {
+async function runDebate(usage: Usage, idea: NormalizedIdea, evaluations: AgentEvaluation[], rounds: number): Promise<AgentDebateTurn[]> {
   const debate: AgentDebateTurn[] = [];
   for (let round = 1; round <= rounds; round += 1) {
     for (const evaluation of evaluations) {
-      debate.push(await debateTurn(idea, evaluation, evaluations, debate, round, rounds));
+      debate.push(await debateTurn(usage, idea, evaluation, evaluations, debate, round, rounds));
     }
   }
   return debate;
 }
 
 async function moderate(
+  usage: Usage,
   idea: NormalizedIdea,
   evaluations: AgentEvaluation[],
   debate: AgentDebateTurn[],
@@ -231,6 +245,7 @@ async function moderate(
 ): Promise<{ moderator: ModeratorSummary; nextActions: string[] }> {
   const scoreVerdict = investmentVerdictFromScore(overallScore);
   const parsed = await chatJson<LlmModeratorResponse>(
+    usage,
     'TASK: moderate. You chair a startup investment panel and make the final call after hearing the debate. ' +
       'Weigh the arguments, not only the average score. ' +
       FENCE_RULES +
@@ -239,6 +254,8 @@ async function moderate(
       `Opening evaluations (JSON): ${JSON.stringify(panelData(evaluations))}\n` +
       `Debate in speaking order (JSON): ${JSON.stringify(debateData(debate))}\n` +
       `Average of the panel's final scores: ${overallScore}, which by the score rule (invest >= 78, watch >= 55, else pass) means "${scoreVerdict}".\n\n` +
+      'Verdict meanings: "invest" = invest now (투자); "watch" = not yet, keep following the company (관망); ' +
+      '"pass" = decline to invest (투자 보류). End finalReasoning with one plain sentence that states your verdict. ' +
       'Return JSON with keys: consensus (up to 4), disagreements (up to 4), verdict ("invest", "watch" or "pass"), ' +
       'finalReasoning (3-5 sentences; if your verdict differs from the score rule, say why), confidence (0-100), ' +
       'nextActions (up to 4 concrete steps for the founder in the next two weeks).',
@@ -259,12 +276,13 @@ async function moderate(
 export async function evaluateWithLLM(input: StartupIdeaInput): Promise<EvaluationResponse> {
   const idea = normalizeIdea(input);
   const rounds = config.debateRounds;
+  const usage: Usage = { calls: 0, promptTokens: 0, completionTokens: 0 };
 
   // Opening evaluations are independent on purpose, so they run in parallel.
-  const evaluations = await Promise.all(AGENT_ROLES.map((role) => evaluateAgent(idea, role)));
-  const debate = await runDebate(idea, evaluations, rounds);
+  const evaluations = await Promise.all(AGENT_ROLES.map((role) => evaluateAgent(usage, idea, role)));
+  const debate = await runDebate(usage, idea, evaluations, rounds);
   const overallScore = clampScore(average(finalPositions(debate).map((turn) => turn.revisedScore)));
-  const { moderator, nextActions } = await moderate(idea, evaluations, debate, overallScore);
+  const { moderator, nextActions } = await moderate(usage, idea, evaluations, debate, overallScore);
 
   const finalAssessment: FinalAssessment = {
     overallScore,
@@ -289,6 +307,8 @@ export async function evaluateWithLLM(input: StartupIdeaInput): Promise<Evaluati
       usedLLM: true,
       generatedAt: new Date().toISOString(),
       debateRounds: rounds,
+      model: config.openAiModel,
+      usage,
     },
   };
 }

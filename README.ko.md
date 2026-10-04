@@ -33,7 +33,9 @@ LLM을 쓰려면 `.env.example`을 `.env`로 복사하고 `OPENAI_API_KEY`를 �
 | `PORT` | `4000` | HTTP 포트 |
 | `OPENAI_API_KEY` | (비어 있음) | 비어 있으면 규칙 기반 모드 |
 | `OPENAI_BASE_URL` | `https://api.openai.com/v1` | Chat Completions 엔드포인트 |
-| `OPENAI_MODEL` | `gpt-4o-mini` | 모델 이름 |
+| `OPENAI_MODEL` | `gpt-5.4-mini` | 모델 이름 |
+| `OPENAI_TEMPERATURE` | (모델 기본값) | 선택. 일부 모델(gpt-5.5 등)은 기본값 외에는 거부합니다 |
+| `OPENAI_REASONING_EFFORT` | (모델 기본값) | 선택. 추론 모델용 |
 | `DEBATE_ROUNDS` | `2` | LLM 모드의 토론 라운드 수(1~3) |
 
 ## 동작 방식
@@ -54,8 +56,15 @@ LLM을 쓰려면 `.env.example`을 `.env`로 복사하고 `OPENAI_API_KEY`를 �
 피치는 신뢰할 수 없는 입력으로 취급합니다. 피치 스스로 닫을 수 없는 `<pitch>` 태그로 감싸고, 프롬프트에서 데이터로만 다루라고 지시합니다.
 프롬프트 인젝션을 어렵게 할 뿐 완전히 막지는 못합니다. 화면은 모델 출력을 이스케이프해서 표시합니다.
 
-실제 LLM 모드 결과(gpt-4o-mini, 2라운드, OneSeat Salon 시나리오)를 [docs/examples/one-seat-salon.llm.json](docs/examples/one-seat-salon.llm.json)에 남겨 두었습니다.
-gpt-4o-mini는 따로 지시하지 않으면 서로 동의하는 경향이 있고 점수가 60~70점대에 몰립니다. 더 강한 모델이 더 잘 토론할 수 있습니다.
+OneSeat Salon 시나리오(2라운드)의 실제 결과를 모델별로 [docs/examples](docs/examples)에 남겨 두었습니다.
+
+| 모델 | 시간 | 토큰 (입력 / 출력) | 1차 점수 | 판정 | 비고 |
+|---|---|---|---|---|---|
+| gpt-4o-mini | 약 36초 | — | 67~72 | 관망 (68) | 일반론 위주. 따로 지시하기 전에는 서로 동의하고 반복함 |
+| **gpt-5.4-mini** (기본값) | 약 41초 | 약 37k / 6k | 44~67 | 투자 보류 (53) | 두 직군 동시 배정, 멤버십 이탈 등 구체적인 반론 |
+| gpt-5.5 | 약 125초 | 약 39k / 11k | 52~58 | 투자 보류 (54) | 멤버십 마진, 동시 시술 가능한 메뉴 조합, CAC, 환불 분쟁, 고객 사진 정보까지 가장 구체적. 약 3배 느림 |
+
+응답의 `meta.usage`에 호출 수와 토큰 사용량이 들어 있습니다. 실행마다 결과가 달라서, 같은 모델과 같은 피치라도 판정이 바뀔 수 있습니다.
 
 LLM 호출이 실패하면 규칙 기반 결과를 돌려주고 `meta.llmError`에 이유를 적습니다.
 
@@ -140,6 +149,8 @@ npm run build && npm start   # dist/에 프로덕션 빌드
 - 테스트와 GitHub Actions CI를 추가했습니다.
 - LLM 모드가 실제로 토론합니다. 라운드를 순서대로 진행하며 심사위원이 앞선 발언에 답하고, 대화록은 템플릿이 아니라 그 발언으로 만들며,
   Moderator가 최종 판정을 내립니다. 피치를 프롬프트 인젝션에 대비해 펜싱하고, 화면은 모델 출력을 이스케이프합니다.
+- 기본 모델을 gpt-5.4-mini로 바꿨습니다(temperature를 강제하지 않아 GPT-5 계열도 동작합니다). Moderator 판정 용어를 정의했고,
+  응답에 토큰 사용량을 넣었으며, `/agents`가 공용 에이전트 정의를 읽습니다.
 
 ## 라이선스
 

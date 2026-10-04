@@ -24,3 +24,9 @@ export const AGENT_DEFINITIONS: Record<AgentRole, { name: string; focus: string 
 };
 
 export const AGENT_ROLES = Object.keys(AGENT_DEFINITIONS) as AgentRole[];
+
+export const MODERATOR_DEFINITION = {
+  role: 'moderator',
+  name: 'Moderator Agent',
+  focus: 'synthesize consensus, disagreements, and final investment reasoning',
+};
