@@ -104,7 +104,14 @@ async function chatJson<T>(usage: Usage, system: string, user: string): Promise<
   });
 
   if (!response.ok) {
-    throw new Error(`OpenAI request failed: ${response.status} ${response.statusText}`);
+    // The provider's message says what went wrong (bad key, unknown model, ...).
+    // It can quote part of the key, so key-like strings are masked.
+    const detail = await response
+      .json()
+      .then((body: any) => String(body?.error?.message ?? ''))
+      .catch(() => '');
+    const masked = detail.replace(/sk-[\w*.-]+/g, 'sk-…').slice(0, 200);
+    throw new Error(`LLM request failed: ${response.status} ${response.statusText}${masked ? ` - ${masked}` : ''}`);
   }
 
   const data = (await response.json()) as any;
