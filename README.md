@@ -55,6 +55,9 @@ The UI transcript is built only from these outputs; the moderator's opening and 
 The pitch is untrusted input: it is wrapped in `<pitch>` tags that the pitch itself cannot close, and the prompts tell the model to treat it as data.
 This makes prompt injection harder, not impossible. The UI escapes model output before rendering it.
 
+A real LLM-mode result (gpt-4o-mini, 2 rounds, the OneSeat Salon scenario) is saved in [docs/examples/one-seat-salon.llm.json](docs/examples/one-seat-salon.llm.json).
+With gpt-4o-mini the panelists tend to agree with each other unless told not to, and their scores cluster in the 60s–70s; a stronger model may argue better.
+
 If an LLM call fails, the server answers with the rule-based result and adds `meta.llmError`.
 
 **Rule-based mode** (no key) looks for keywords in the pitch (target customer, revenue model, pricing, channels, competitors, MVP scope, regulated domain, hardware, …)
