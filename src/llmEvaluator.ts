@@ -23,33 +23,6 @@ import {
   verdictFromScore,
 } from './utils.js';
 
-interface LlmAgentResponse {
-  summary: string;
-  strengths: string[];
-  concerns: string[];
-  recommendations: string[];
-  score: number;
-  scoreBreakdown?: Partial<ScoreBreakdown>;
-}
-
-interface LlmDebateResponse {
-  addressedTo: string;
-  message: string;
-  stance: 'bullish' | 'neutral' | 'bearish';
-  agreesWith: string[];
-  rebuttals: string[];
-  revisedScore: number;
-}
-
-interface LlmModeratorResponse {
-  consensus: string[];
-  disagreements: string[];
-  finalReasoning: string;
-  confidence: number;
-  verdict: string;
-  nextActions: string[];
-}
-
 const REQUEST_TIMEOUT_MS = 60_000;
 
 // The pitch is untrusted input. It is fenced in <pitch> tags, and the system
@@ -83,7 +56,7 @@ interface Usage {
   completionTokens: number;
 }
 
-async function chatJson<T>(usage: Usage, system: string, user: string): Promise<T> {
+async function chatJson(usage: Usage, system: string, user: string): Promise<Record<string, unknown>> {
   const response = await fetch(`${config.openAiBaseUrl}/chat/completions`, {
     method: 'POST',
     headers: {
@@ -114,13 +87,26 @@ async function chatJson<T>(usage: Usage, system: string, user: string): Promise<
     throw new Error(`LLM request failed: ${response.status} ${response.statusText}${masked ? ` - ${masked}` : ''}`);
   }
 
-  const data = (await response.json()) as any;
+  const data = await response.json().catch(() => null);
   usage.calls += 1;
   usage.promptTokens += Number(data?.usage?.prompt_tokens) || 0;
   usage.completionTokens += Number(data?.usage?.completion_tokens) || 0;
   const content = data?.choices?.[0]?.message?.content;
-  if (!content) throw new Error('No content from model');
-  return JSON.parse(content) as T;
+  if (typeof content !== 'string' || !content.trim()) throw new Error('No content from model');
+  let value: unknown;
+  try {
+    value = JSON.parse(content);
+  } catch {
+    throw new Error('Model content is not valid JSON.');
+  }
+  const parsed = asRecord(value);
+  if (!parsed) throw new Error('Model content must be a JSON object.');
+  return parsed;
+}
+
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  return value as Record<string, unknown>;
 }
 
 function stringList(value: unknown, max: number): string[] {
@@ -131,14 +117,21 @@ function text(value: unknown): string {
   return typeof value === 'string' ? value.trim() : '';
 }
 
-function normalizeBreakdown(partial?: Partial<ScoreBreakdown>): ScoreBreakdown {
+function normalizeScore(value: unknown): number | undefined {
+  if (typeof value !== 'number' && (typeof value !== 'string' || !value.trim())) return undefined;
+  const score = Number(value);
+  return Number.isFinite(score) ? clampScore(score) : undefined;
+}
+
+function normalizeBreakdown(value: unknown): ScoreBreakdown {
+  const partial = asRecord(value);
   return {
-    problemClarity: clampScore(Number(partial?.problemClarity) || 60),
-    marketAttractiveness: clampScore(Number(partial?.marketAttractiveness) || 60),
-    feasibility: clampScore(Number(partial?.feasibility) || 60),
-    businessModelStrength: clampScore(Number(partial?.businessModelStrength) || 60),
-    growthPotential: clampScore(Number(partial?.growthPotential) || 60),
-    riskReadiness: clampScore(Number(partial?.riskReadiness) || 60),
+    problemClarity: normalizeScore(partial?.problemClarity) ?? 60,
+    marketAttractiveness: normalizeScore(partial?.marketAttractiveness) ?? 60,
+    feasibility: normalizeScore(partial?.feasibility) ?? 60,
+    businessModelStrength: normalizeScore(partial?.businessModelStrength) ?? 60,
+    growthPotential: normalizeScore(partial?.growthPotential) ?? 60,
+    riskReadiness: normalizeScore(partial?.riskReadiness) ?? 60,
   };
 }
 
@@ -152,7 +145,7 @@ function isVerdict(value: unknown): value is InvestmentVerdict {
 
 async function evaluateAgent(usage: Usage, idea: NormalizedIdea, role: AgentRole): Promise<AgentEvaluation> {
   const agent = AGENT_DEFINITIONS[role];
-  const parsed = await chatJson<LlmAgentResponse>(
+  const parsed = await chatJson(
     usage,
     `TASK: evaluate. You are ${agent.name} on a startup investment panel. Focus on ${agent.focus}. ` +
       'Score on the full 0-100 range: 50 is a typical early-stage idea, 80+ is rare, below 30 means serious flaws. ' +
@@ -163,12 +156,16 @@ async function evaluateAgent(usage: Usage, idea: NormalizedIdea, role: AgentRole
       'score (0-100), scoreBreakdown (0-100 each: problemClarity, marketAttractiveness, feasibility, businessModelStrength, growthPotential, riskReadiness).',
   );
 
-  const score = clampScore(Number(parsed.score) || 0);
+  const score = normalizeScore(parsed.score);
+  const summary = text(parsed.summary);
+  if (score === undefined || !summary) {
+    throw new Error(`Incomplete opening evaluation from the ${role} agent.`);
+  }
   return {
     role,
     score,
     verdict: verdictFromScore(score),
-    summary: text(parsed.summary),
+    summary,
     strengths: stringList(parsed.strengths, 4),
     concerns: stringList(parsed.concerns, 4),
     recommendations: stringList(parsed.recommendations, 3),
@@ -198,7 +195,7 @@ async function debateTurn(
   const previous = finalPositions(debateSoFar).find((turn) => turn.role === self.role);
   const currentScore = previous?.revisedScore ?? self.score;
 
-  const parsed = await chatJson<LlmDebateResponse>(
+  const parsed = await chatJson(
     usage,
     `TASK: debate. You are ${agent.name} (role "${self.role}") on a startup investment panel, focused on ${agent.focus}. ` +
       `This is debate round ${round} of ${rounds}. Speak like a panelist in a meeting: pick one specific claim another panelist made ` +
@@ -215,9 +212,9 @@ async function debateTurn(
       'agreesWith (roles you agree with), rebuttals (up to 3 short bullet points), revisedScore (0-100).',
   );
 
-  const revised = Number(parsed.revisedScore);
   const rebuttals = stringList(parsed.rebuttals, 3);
-  const message = text(parsed.message) || rebuttals.join(' ');
+  const message = text(parsed.message) || rebuttals.join(' ').trim();
+  if (!message) throw new Error(`Empty debate turn from the ${self.role} agent in round ${round}.`);
 
   return {
     role: self.role,
@@ -227,7 +224,7 @@ async function debateTurn(
     stance: parsed.stance === 'bullish' || parsed.stance === 'bearish' ? parsed.stance : 'neutral',
     agreesWith: stringList(parsed.agreesWith, 4).filter((role): role is AgentRole => isRole(role) && role !== self.role),
     rebuttals,
-    revisedScore: clampScore(Number.isFinite(revised) && parsed.revisedScore !== null ? revised : currentScore),
+    revisedScore: normalizeScore(parsed.revisedScore) ?? currentScore,
     closingNote: message,
   };
 }
@@ -251,7 +248,7 @@ async function moderate(
   overallScore: number,
 ): Promise<{ moderator: ModeratorSummary; nextActions: string[] }> {
   const scoreVerdict = investmentVerdictFromScore(overallScore);
-  const parsed = await chatJson<LlmModeratorResponse>(
+  const parsed = await chatJson(
     usage,
     'TASK: moderate. You chair a startup investment panel and make the final call after hearing the debate. ' +
       'Weigh the arguments, not only the average score. ' +
@@ -268,12 +265,16 @@ async function moderate(
       'nextActions (up to 4 concrete steps for the founder in the next two weeks).',
   );
 
+  const finalReasoning = text(parsed.finalReasoning);
+  const confidence = normalizeScore(parsed.confidence);
+  if (!finalReasoning || confidence === undefined) throw new Error('Incomplete moderator assessment.');
+
   return {
     moderator: {
       consensus: stringList(parsed.consensus, 4),
       disagreements: stringList(parsed.disagreements, 4),
-      finalReasoning: text(parsed.finalReasoning) || 'Moderator summary unavailable.',
-      confidence: clampScore(Number(parsed.confidence) || 0),
+      finalReasoning,
+      confidence,
       verdict: isVerdict(parsed.verdict) ? parsed.verdict : scoreVerdict,
     },
     nextActions: stringList(parsed.nextActions, 4),

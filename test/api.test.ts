@@ -90,3 +90,23 @@ test('POST /evaluate falls back to rules and reports the error when the LLM fail
     failing.server.close();
   }
 });
+
+test('POST /evaluate labels fallback when the model returns an incomplete review', async () => {
+  const incomplete = await listen((_req, res) => {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ choices: [{ message: { content: '{}' } }] }));
+  });
+  config.openAiApiKey = 'test-key';
+  config.openAiBaseUrl = incomplete.url;
+  try {
+    const res = await post('/evaluate', README_EXAMPLE);
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.meta.usedLLM, false);
+    assert.match(body.meta.llmError, /Incomplete opening evaluation/);
+    assert.equal(body.evaluations.length, 5);
+  } finally {
+    config.openAiApiKey = '';
+    incomplete.server.close();
+  }
+});
