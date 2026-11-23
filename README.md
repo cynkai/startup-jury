@@ -70,7 +70,8 @@ Real results for the OneSeat Salon scenario (2 rounds) are saved in [docs/exampl
 
 `meta.usage` in each response reports the calls and tokens used. Runs vary: the same model can land on a different verdict for the same pitch.
 
-If an LLM call fails, the server answers with the rule-based result and adds `meta.llmError`.
+If an LLM call fails or the model returns an incomplete review, the server answers
+with the rule-based result and adds `meta.llmError`.
 
 **Rule-based mode** (no key) looks for keywords in the pitch (target customer, revenue model, pricing, channels, competitors, MVP scope, regulated domain, hardware, …)
 and turns them into scores with fixed weights. Its "debate" is one round of rule-generated remarks, and the verdict follows the score.

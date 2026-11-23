@@ -20,6 +20,7 @@ let server: http.Server;
 let requests: Recorded[] = [];
 let moderatorVerdict = 'pass';
 let bodies: Record<string, unknown>[] = [];
+let replaceContent: ((task: string, reply: object) => string) | undefined;
 
 const ORDER = ['vc', 'market', 'tech', 'growth', 'risk'];
 
@@ -56,7 +57,10 @@ before(async () => {
       const parsed = JSON.parse(body);
       bodies.push(parsed);
       const { messages } = parsed;
-      const content = JSON.stringify(reply(messages[0].content, messages[1].content));
+      const system = messages[0].content;
+      const answer = reply(system, messages[1].content);
+      const task = /TASK: (\w+)/.exec(system)?.[1] ?? '';
+      const content = replaceContent?.(task, answer) ?? JSON.stringify(answer);
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ choices: [{ message: { content } }], usage: { prompt_tokens: 100, completion_tokens: 10 } }));
     });
@@ -71,6 +75,7 @@ beforeEach(() => {
   requests = [];
   bodies = [];
   moderatorVerdict = 'pass';
+  replaceContent = undefined;
 });
 
 after(() => {
@@ -147,3 +152,39 @@ test('no temperature is sent unless configured, and usage is reported', async ()
   assert.deepEqual(result.meta.usage, { calls: 16, promptTokens: 1600, completionTokens: 160 });
   assert.equal(result.meta.model, config.openAiModel);
 });
+
+test('zero scores survive normalization throughout the panel', async () => {
+  replaceContent = (task, answer) => {
+    if (task === 'evaluate') {
+      return JSON.stringify({
+        ...answer,
+        score: 0,
+        scoreBreakdown: { problemClarity: 0, marketAttractiveness: '0', feasibility: null },
+      });
+    }
+    return JSON.stringify({ ...answer, revisedScore: 0, confidence: 0 });
+  };
+  const result = await evaluateWithLLM(IDEA);
+
+  for (const agent of result.evaluations) {
+    assert.equal(agent.score, 0);
+    assert.equal(agent.scoreBreakdown.problemClarity, 0);
+    assert.equal(agent.scoreBreakdown.marketAttractiveness, 0);
+    assert.equal(agent.scoreBreakdown.feasibility, 60);
+  }
+  assert.equal(result.finalAssessment.overallScore, 0);
+  assert.equal(result.moderator.confidence, 0);
+});
+
+for (const [phase, content, error] of [
+  ['evaluate', '[]', /must be a JSON object/],
+  ['evaluate', 'This is not JSON', /not valid JSON/],
+  ['evaluate', '{"summary":"A summary","score":null}', /Incomplete opening evaluation/],
+  ['debate', '{"message":" ","rebuttals":[" "]}', /Empty debate turn/],
+  ['moderate', '{"verdict":"invest","confidence":95}', /Incomplete moderator assessment/],
+] as const) {
+  test(`malformed ${phase} content fails instead of producing a partial verdict: ${error.source}`, async () => {
+    replaceContent = (task, answer) => task === phase ? content : JSON.stringify(answer);
+    await assert.rejects(evaluateWithLLM(IDEA), error);
+  });
+}
