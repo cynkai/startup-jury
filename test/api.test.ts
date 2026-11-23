@@ -47,6 +47,17 @@ test('GET /health reports fallback mode without a key', async () => {
   assert.equal((await res.json()).mode, 'fallback');
 });
 
+test('GET / serves the dashboard while unknown routes return JSON 404', async () => {
+  const dashboard = await fetch(`${baseUrl}/`);
+  assert.equal(dashboard.status, 200);
+  assert.match(dashboard.headers.get('content-type') ?? '', /^text\/html/);
+  assert.match(await dashboard.text(), /<html\b/i);
+
+  const missing = await fetch(`${baseUrl}/missing-route`);
+  assert.equal(missing.status, 404);
+  assert.deepEqual(await missing.json(), { error: 'Route not found' });
+});
+
 test('GET /agents and /scenarios list reviewers and presets', async () => {
   const agents = await (await fetch(`${baseUrl}/agents`)).json();
   assert.deepEqual(agents.agents.map((a: { role: string }) => a.role), ['vc', 'market', 'tech', 'growth', 'risk']);
@@ -68,6 +79,22 @@ test('POST /evaluate rejects an invalid body with 400', async () => {
   const body = await res.json();
   assert.ok(body.details.fieldErrors.title);
   assert.ok(body.details.fieldErrors.pitch);
+});
+
+test('POST /evaluate returns JSON for malformed, oversized and unsupported request bodies', async () => {
+  for (const [body, contentType, status, error] of [
+    ['{"pitch":"private draft",', 'application/json', 400, 'Invalid JSON request body'],
+    [JSON.stringify({ pitch: 'x'.repeat(110_000) }), 'application/json', 413, 'Request body too large'],
+    ['{}', 'application/json; charset=iso-8859-1', 415, 'Unsupported request body encoding'],
+  ] as const) {
+    const res = await fetch(`${baseUrl}/evaluate`, {
+      method: 'POST',
+      headers: { 'Content-Type': contentType },
+      body,
+    });
+    assert.equal(res.status, status);
+    assert.deepEqual(await res.json(), { error });
+  }
 });
 
 test('POST /evaluate falls back to rules and reports the error when the LLM fails', async () => {

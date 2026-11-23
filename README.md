@@ -88,6 +88,8 @@ The login screen only stores a display name in the browser's `localStorage`; the
 | `GET` | `/scenarios` | Built-in demo pitches |
 | `POST` | `/evaluate` | Evaluate a pitch |
 
+The API returns JSON errors. Invalid input or malformed JSON returns `400`, a body over 100 KB returns `413`, and unsupported JSON encodings return `415`. Unknown routes return `404`.
+
 `POST /evaluate` body:
 
 | Field | Type | Rule |
